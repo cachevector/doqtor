@@ -4,6 +4,12 @@
 
 Doqtor is a GitHub-native system that detects documentation drift after code changes and generates accurate, reviewable updates via pull requests. It doesn't generate docs from scratch — it ensures your existing docs never become incorrect.
 
+## The Problem
+
+Documentation goes stale the moment code changes. Developers update function signatures, rename parameters, remove APIs — and the docs keep referencing the old version. Nobody notices until a user hits a broken example.
+
+Doqtor catches this automatically.
+
 ## How It Works
 
 ```
@@ -16,38 +22,32 @@ PR Merged → Webhook → Diff Analysis → Doc Matching → Drift Detection →
 4. It detects mismatches: wrong signatures, outdated examples, removed APIs
 5. It generates fixes and opens a PR with the updates
 
-## Features
+No full-repo scans. No doc generation from scratch. Just precise, diff-based corrections.
 
-- **Diff-based analysis** — only processes what changed, not the entire repo
-- **AST-powered parsing** — understands your code structure, not just text
-- **Smart doc matching** — finds related docs by symbol name, file proximity, and content
-- **Deterministic fixes** — signature and parameter updates applied automatically
-- **AI-assisted fixes** (optional) — natural language rewrites for complex changes
-- **GitHub-native** — runs as a GitHub App, creates PRs for review
-- **CLI tool** — run locally with `doqtor check` and `doqtor fix`
-- **Configurable** — control which docs to scan, what to ignore, and how fixes are generated
+## What It Catches
+
+| Drift Type | Example |
+|---|---|
+| **Signature mismatch** | `createUser(name, email)` → `createUser(name)` |
+| **Removed symbol** | Docs reference a deleted function |
+| **Renamed symbol** | `getUsers` → `fetchUsers` but docs still say `getUsers` |
+| **Outdated example** | Code block calls function with wrong parameters |
+
+Each detection includes a **confidence score** so reviewers can prioritize.
 
 ## Quick Start
 
 ### Prerequisites
 
 - [Bun](https://bun.sh) v1.1+
-- Node.js 20+
 
 ### Installation
 
 ```bash
-# Clone the repo
 git clone https://github.com/cachevector/doqtor.git
 cd doqtor
-
-# Install dependencies
 bun install
-
-# Build all packages
 bun run build
-
-# Run tests
 bun run test
 ```
 
@@ -55,16 +55,32 @@ bun run test
 
 ```bash
 # Check for documentation drift in your local changes
-doqtor check
+bun run --cwd apps/cli src/index.ts check
 
 # Apply fixes automatically
-doqtor fix
+bun run --cwd apps/cli src/index.ts fix
+
+# Preview fixes without applying
+bun run --cwd apps/cli src/index.ts fix --dry-run
 
 # Generate a default config file
-doqtor init
+bun run --cwd apps/cli src/index.ts init
 ```
 
-### Configuration
+### GitHub App (Backend)
+
+```bash
+# Copy and configure environment
+cp .env.example .env
+# Edit .env with your GitHub App credentials
+
+# Start the webhook server
+bun run --cwd apps/backend dev
+```
+
+The backend listens for `pull_request.closed` webhook events and runs the full pipeline when a PR is merged.
+
+## Configuration
 
 Create a `doqtor.config.json` in your project root:
 
@@ -81,14 +97,14 @@ Create a `doqtor.config.json` in your project root:
 ```
 
 | Option | Description | Default |
-|--------|-------------|---------|
+|---|---|---|
 | `docsPaths` | Files/directories to scan for documentation | `["README.md", "docs/"]` |
 | `ignore` | Paths to exclude from analysis | `["node_modules/", "dist/", ".git/"]` |
 | `ai.enabled` | Enable AI-assisted fix generation | `false` |
 | `ai.provider` | AI provider (`openai` or `anthropic`) | `"openai"` |
 | `autoPR` | Automatically create PRs with fixes | `true` |
 
-## Project Structure
+## Architecture
 
 ```
 doqtor/
@@ -96,38 +112,47 @@ doqtor/
 │   ├── backend/          # Webhook server (Hono)
 │   └── cli/              # CLI tool (Commander)
 ├── packages/
-│   ├── core-engine/      # Shared types + diff analyzer + drift detector
-│   ├── parser/           # AST parsing (ts-morph)
+│   ├── core-engine/      # Shared types, diff analyzer, drift detector
+│   ├── parser/           # TypeScript AST parsing (ts-morph)
 │   ├── matcher/          # Doc ↔ code matching
 │   ├── fixer/            # Fix generation (deterministic + AI)
 │   └── github/           # GitHub App integration (Octokit)
 ├── config/
 │   ├── default-config.json
 │   └── config-schema.json
-├── turbo.json
-└── package.json
+└── doqtor.config.json
 ```
+
+### Pipeline
+
+```
+┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+│  Parser  │ →  │   Diff   │ →  │ Matcher  │ →  │  Drift   │ →  │  Fixer   │
+│(ts-morph)│    │ Analyzer │    │          │    │ Detector │    │          │
+└──────────┘    └──────────┘    └──────────┘    └──────────┘    └──────────┘
+```
+
+- **Parser**: Extracts functions, classes, interfaces, types, and constants from TypeScript using AST analysis
+- **Diff Analyzer**: Parses unified diffs, identifies changed symbols by comparing old/new ASTs
+- **Matcher**: Scans markdown docs for symbol references by name, file proximity, and content
+- **Drift Detector**: Compares code changes against doc references to find mismatches
+- **Fixer**: Generates deterministic patches (signature replacement, renames, example updates) with optional AI fallback
 
 ## Development
 
 ```bash
-# Run all packages in dev mode
-bun run dev
-
-# Lint
-bun run lint
-
-# Format
-bun run format
-
-# Type check
-bun run typecheck
+bun run dev          # Watch mode for all packages
+bun run build        # Build all packages
+bun run test         # Run all tests (67 tests)
+bun run lint         # Lint all packages
+bun run format       # Format with Prettier
+bun run typecheck    # Type check all packages
 ```
 
 ## Tech Stack
 
 - **Runtime:** Bun
-- **Language:** TypeScript (strict mode)
+- **Language:** TypeScript (strict mode, no `any`)
 - **Monorepo:** Turborepo
 - **Backend:** Hono
 - **CLI:** Commander
@@ -135,6 +160,11 @@ bun run typecheck
 - **GitHub:** Octokit
 - **Testing:** Vitest
 - **Bundling:** tsup
+- **Linting:** ESLint + Prettier
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions and development guidelines.
 
 ## License
 
