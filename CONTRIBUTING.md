@@ -1,13 +1,10 @@
 # Contributing to Doqtor
 
-Thanks for your interest in contributing to Doqtor! This guide will help you get set up and make your first contribution.
-
 ## Getting Started
 
 ### Prerequisites
 
 - [Bun](https://bun.sh) v1.1+
-- [Node.js](https://nodejs.org) 20+
 - Git
 
 ### Setup
@@ -29,12 +26,12 @@ bun run typecheck
 
 ## Project Structure
 
-This is a monorepo managed with Turborepo and Bun workspaces.
+Monorepo managed with Turborepo and Bun workspaces.
 
 | Package | Description |
 |---------|-------------|
 | `packages/core-engine` | Shared types, diff analyzer, drift detector |
-| `packages/parser` | TypeScript AST parsing via ts-morph |
+| `packages/parser` | TypeScript AST parsing |
 | `packages/matcher` | Maps code changes to documentation files |
 | `packages/fixer` | Generates documentation fixes |
 | `packages/github` | GitHub App integration |
@@ -46,7 +43,7 @@ This is a monorepo managed with Turborepo and Bun workspaces.
 1. Create a branch from `master`
 2. Make your changes
 3. Write or update tests
-4. Ensure all checks pass:
+4. Make sure all checks pass:
    ```bash
    bun run test
    bun run lint
@@ -56,12 +53,12 @@ This is a monorepo managed with Turborepo and Bun workspaces.
 
 ## Code Standards
 
-- **TypeScript strict mode** — no `any` types
-- **ESLint + Prettier** — run `bun run lint:fix` and `bun run format` before committing
-- **Consistent type imports** — use `import type { ... }` for type-only imports
-- **Small, pure functions** — prefer testable units over large classes
-- **No silent failures** — all errors must be logged with context
-- **Tests required** — unit tests for all new logic, snapshot tests for doc update scenarios
+- TypeScript strict mode, no `any` types
+- Run `bun run lint:fix` and `bun run format` before committing
+- Use `import type { ... }` for type-only imports
+- Prefer small, testable functions over large classes
+- All errors must be logged with context
+- Unit tests required for all new logic
 
 ## Testing
 
@@ -76,11 +73,9 @@ cd packages/parser && bun run test
 bun run test:watch
 ```
 
-We use [Vitest](https://vitest.dev) for testing. Tests live next to the source files or in a `__tests__` directory within each package.
+Tests live next to the source files or in a `__tests__` directory within each package.
 
 ## Commit Messages
-
-Use clear, descriptive commit messages:
 
 - `feat: add parameter diffing to parser`
 - `fix: handle empty diff input in core-engine`
@@ -90,11 +85,11 @@ Use clear, descriptive commit messages:
 
 ## Pull Requests
 
-- Keep PRs focused — one feature or fix per PR
+- One feature or fix per PR
 - Include a description of what changed and why
 - Link related issues if applicable
-- Ensure CI passes before requesting review
+- Make sure CI passes before requesting review
 
 ## Questions?
 
-Open an issue if you have questions or want to discuss a feature before implementing it.
+Open an issue if you have questions or want to discuss a feature before working on it.
