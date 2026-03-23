@@ -35,20 +35,6 @@ Each detection includes a confidence score so reviewers can prioritize.
 
 ## Quick Start
 
-### Prerequisites
-
-- [Bun](https://bun.sh) v1.1+
-
-### Installation
-
-```bash
-git clone https://github.com/cachevector/doqtor.git
-cd doqtor
-bun install
-bun run build
-bun run test
-```
-
 ### CLI
 
 ```bash
@@ -102,20 +88,9 @@ Create a `doqtor.config.json` in your project root:
 | `ai.provider` | Provider to use (`openai` or `anthropic`) | `"openai"` |
 | `autoPR` | Create PRs with fixes automatically | `true` |
 
-## Development
+## Development and Contributing
 
-```bash
-bun run dev          # Watch mode for all packages
-bun run build        # Build all packages
-bun run test         # Run all tests
-bun run lint         # Lint all packages
-bun run format       # Format with Prettier
-bun run typecheck    # Type check all packages
-```
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, development commands, and guidelines.
 
 ## License
 

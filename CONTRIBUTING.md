@@ -38,6 +38,17 @@ Monorepo managed with Turborepo and Bun workspaces.
 | `apps/backend` | Webhook server |
 | `apps/cli` | CLI tool |
 
+## Common Commands
+
+```bash
+bun run dev          # Watch mode for all packages
+bun run build        # Build all packages
+bun run test         # Run all tests
+bun run lint         # Lint all packages
+bun run format       # Format with Prettier
+bun run typecheck    # Type check all packages
+```
+
 ## Development Workflow
 
 1. Create a branch from `master`
