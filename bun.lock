@@ -23,6 +23,7 @@
         "@doqtor/github": "workspace:*",
         "@doqtor/matcher": "workspace:*",
         "@doqtor/parser": "workspace:*",
+        "@octokit/rest": "^21.0.0",
         "hono": "^4.0.0",
       },
       "devDependencies": {
