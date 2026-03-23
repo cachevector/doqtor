@@ -1,0 +1,9 @@
+{
+  "docsPaths": ["README.md", "docs/"],
+  "ignore": ["node_modules/", "dist/", ".git/"],
+  "ai": {
+    "enabled": false,
+    "provider": "openai"
+  },
+  "autoPR": true
+}

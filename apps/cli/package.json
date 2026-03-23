@@ -1,0 +1,29 @@
+{
+  "name": "@doqtor/cli",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "doqtor": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@doqtor/core-engine": "workspace:*",
+    "@doqtor/fixer": "workspace:*",
+    "@doqtor/matcher": "workspace:*",
+    "@doqtor/parser": "workspace:*",
+    "commander": "^12.0.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0"
+  }
+}

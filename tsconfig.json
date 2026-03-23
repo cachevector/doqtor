@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "references": [
+    { "path": "packages/core-engine" },
+    { "path": "packages/parser" },
+    { "path": "packages/matcher" },
+    { "path": "packages/fixer" },
+    { "path": "packages/github" },
+    { "path": "apps/backend" },
+    { "path": "apps/cli" }
+  ]
+}

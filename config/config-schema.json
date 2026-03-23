@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Doqtor Configuration",
+  "type": "object",
+  "properties": {
+    "docsPaths": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Paths to documentation files or directories to monitor",
+      "default": ["README.md", "docs/"]
+    },
+    "ignore": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Paths to ignore during analysis",
+      "default": ["node_modules/", "dist/", ".git/"]
+    },
+    "ai": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable AI-assisted fix generation",
+          "default": false
+        },
+        "provider": {
+          "type": "string",
+          "enum": ["openai", "anthropic"],
+          "description": "AI provider to use for fix generation"
+        }
+      },
+      "required": ["enabled"]
+    },
+    "autoPR": {
+      "type": "boolean",
+      "description": "Automatically create PRs with documentation fixes",
+      "default": true
+    }
+  },
+  "required": ["docsPaths", "ignore", "ai", "autoPR"]
+}

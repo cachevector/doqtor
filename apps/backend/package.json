@@ -1,0 +1,28 @@
+{
+  "name": "@doqtor/backend",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsup",
+    "dev": "bun --watch src/index.ts",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "start": "bun dist/index.js"
+  },
+  "dependencies": {
+    "@doqtor/core-engine": "workspace:*",
+    "@doqtor/fixer": "workspace:*",
+    "@doqtor/github": "workspace:*",
+    "@doqtor/matcher": "workspace:*",
+    "@doqtor/parser": "workspace:*",
+    "hono": "^4.0.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0"
+  }
+}
