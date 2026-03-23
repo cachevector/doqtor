@@ -15,3 +15,6 @@ export type { DiffFile, DiffHunk } from "./diff-parser.js";
 
 export { analyzeDiff } from "./diff-analyzer.js";
 export type { ParseFn, AnalyzerInput } from "./diff-analyzer.js";
+
+export { detectDrift } from "./drift-detector.js";
+export type { DriftDetectorInput } from "./drift-detector.js";
