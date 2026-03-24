@@ -156,12 +156,19 @@ describe("generateFixes", () => {
   });
 
   describe("multiple items", () => {
-    it("generates patches for multiple drift items", async () => {
+    it("generates patches for multiple drift items in different regions", async () => {
       const items: DriftItem[] = [
         {
           type: "renamed-symbol",
           symbolName: "oldName",
-          docReference: ref("oldName", "Use oldName to do things."),
+          docReference: {
+            docFilePath: "README.md",
+            lineStart: 1,
+            lineEnd: 5,
+            symbolName: "oldName",
+            matchType: "name",
+            content: "Use oldName to do things.",
+          },
           oldValue: "oldName",
           newValue: "newName",
           confidence: 0.75,
@@ -169,7 +176,14 @@ describe("generateFixes", () => {
         {
           type: "outdated-example",
           symbolName: "api",
-          docReference: ref("api", "```\napi(x, y)\n```"),
+          docReference: {
+            docFilePath: "README.md",
+            lineStart: 10,
+            lineEnd: 15,
+            symbolName: "api",
+            matchType: "name",
+            content: "```\napi(x, y)\n```",
+          },
           oldValue: "api(x, y)",
           newValue: "api(x)",
           confidence: 0.8,
@@ -178,6 +192,32 @@ describe("generateFixes", () => {
 
       const patches = await generateFixes(makeReport(items));
       expect(patches).toHaveLength(2);
+    });
+
+    it("merges patches for overlapping drift items into one", async () => {
+      const items: DriftItem[] = [
+        {
+          type: "renamed-symbol",
+          symbolName: "oldName",
+          docReference: ref("oldName", "Use `oldName()` and `otherOld()`."),
+          oldValue: "oldName",
+          newValue: "newName",
+          confidence: 0.75,
+        },
+        {
+          type: "renamed-symbol",
+          symbolName: "otherOld",
+          docReference: ref("otherOld", "Use `oldName()` and `otherOld()`."),
+          oldValue: "otherOld",
+          newValue: "otherNew",
+          confidence: 0.75,
+        },
+      ];
+
+      const patches = await generateFixes(makeReport(items));
+      expect(patches).toHaveLength(1);
+      expect(patches[0]!.newText).toContain("newName");
+      expect(patches[0]!.newText).toContain("otherNew");
     });
   });
 });

@@ -146,7 +146,8 @@ export function deleteUser(id: number): void {
 
     const report = detectDrift({ changeSets, docReferences: docRefs });
 
-    expect(report.items.some((i) => i.type === "removed-symbol")).toBe(true);
+    // When a rename candidate exists, removed-symbol is suppressed in favor of renamed-symbol
+    expect(report.items.some((i) => i.type === "removed-symbol")).toBe(false);
     expect(report.items.some((i) => i.type === "renamed-symbol")).toBe(true);
   });
 });

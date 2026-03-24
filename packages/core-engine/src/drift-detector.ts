@@ -9,8 +9,15 @@ export function detectDrift(input: DriftDetectorInput): DriftReport {
   const items: DriftItem[] = [];
 
   for (const changeSet of input.changeSets) {
+    // Compute rename pairs first so we can exclude them from removed-symbol
+    const renamedNames = new Set<string>();
+    for (const removed of changeSet.removed) {
+      const match = findBestRenameCandidate(removed, changeSet.added);
+      if (match) renamedNames.add(removed.name);
+    }
+
     items.push(...detectSignatureMismatches(changeSet, input.docReferences));
-    items.push(...detectRemovedSymbols(changeSet, input.docReferences));
+    items.push(...detectRemovedSymbols(changeSet, input.docReferences, renamedNames));
     items.push(...detectRenamedSymbols(changeSet, input.docReferences));
     items.push(...detectOutdatedExamples(changeSet, input.docReferences));
   }
@@ -54,10 +61,13 @@ function detectSignatureMismatches(
 function detectRemovedSymbols(
   changeSet: ChangeSet,
   docRefs: DocReference[],
+  renamedNames: Set<string>,
 ): DriftItem[] {
   const items: DriftItem[] = [];
 
   for (const removed of changeSet.removed) {
+    if (renamedNames.has(removed.name)) continue;
+
     const refs = findRefsForSymbol(removed.name, docRefs);
 
     for (const ref of refs) {
@@ -209,7 +219,53 @@ function findBestRenameCandidate(
   removed: ParsedSymbol,
   added: ParsedSymbol[],
 ): ParsedSymbol | undefined {
-  return added.find((a) => a.kind === removed.kind && a.name !== removed.name);
+  const candidates = added.filter((a) => a.kind === removed.kind && a.name !== removed.name);
+  if (candidates.length === 0) return undefined;
+  if (candidates.length === 1) return candidates[0];
+
+  const removedBase = baseName(removed.name);
+  const removedParent = parentName(removed.name);
+
+  let best: ParsedSymbol | undefined;
+  let bestScore = -1;
+
+  for (const candidate of candidates) {
+    let score = 0;
+    const candidateBase = baseName(candidate.name);
+    const candidateParent = parentName(candidate.name);
+
+    // Same parent is the strongest signal for methods (e.g. Validator.check -> Validator.run)
+    if (removedParent && candidateParent && candidateParent === removedParent) {
+      score += 20;
+    }
+
+    // Exact base name match (e.g. StringRule.minLength -> StringSchema.minLength)
+    if (candidateBase === removedBase) {
+      score += 10;
+    }
+
+    // Penalize cross-class base-name matches when both have parents
+    // (e.g. Validator.check should not match StringSchema.check)
+    if (removedParent && candidateParent && candidateParent !== removedParent && candidateBase === removedBase) {
+      score -= 5;
+    }
+
+    if (score > bestScore) {
+      bestScore = score;
+      best = candidate;
+    }
+  }
+
+  return best;
+}
+
+function baseName(name: string): string {
+  return name.includes(".") ? name.split(".").pop()! : name;
+}
+
+function parentName(name: string): string | null {
+  const idx = name.lastIndexOf(".");
+  return idx >= 0 ? name.substring(0, idx) : null;
 }
 
 function deduplicateItems(items: DriftItem[]): DriftItem[] {
