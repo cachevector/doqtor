@@ -4,7 +4,8 @@
   "packageManager": "bun@1.3.10",
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "apps/*",
+    "tests/*"
   ],
   "scripts": {
     "build": "turbo build",
@@ -16,7 +17,8 @@
     "test": "turbo test",
     "test:watch": "turbo test:watch",
     "typecheck": "turbo typecheck",
-    "clean": "turbo clean"
+    "clean": "turbo clean",
+    "simulate": "bun tests/simulation/src/run.ts"
   },
   "devDependencies": {
     "@types/bun": "^1.1.0",

@@ -1,0 +1,15 @@
+{
+  "name": "@doqtor/simulation",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "simulate": "bun src/run.ts"
+  },
+  "dependencies": {
+    "@doqtor/core-engine": "workspace:*",
+    "@doqtor/parser": "workspace:*",
+    "@doqtor/matcher": "workspace:*",
+    "@doqtor/fixer": "workspace:*"
+  }
+}
