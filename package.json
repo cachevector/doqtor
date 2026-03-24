@@ -19,7 +19,8 @@
     "typecheck": "turbo typecheck",
     "clean": "turbo clean",
     "simulate": "bun tests/simulation/src/run.ts",
-    "simulate:validatorjs": "bun tests/simulation/src/run-validatorjs.ts"
+    "simulate:validatorjs": "bun tests/simulation/src/run-validatorjs.ts",
+    "simulate:statestream": "bun tests/simulation/src/run-statestream.ts"
   },
   "devDependencies": {
     "@types/bun": "^1.1.0",
