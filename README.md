@@ -88,6 +88,20 @@ Create a `doqtor.config.json` in your project root:
 | `ai.provider` | Provider to use (`openai` or `anthropic`) | `"openai"` |
 | `autoPR` | Create PRs with fixes automatically | `true` |
 
+## API
+
+### Parser
+
+Use `parseSourceFile(filePath, content)` to extract symbols from a TypeScript file:
+
+```ts
+import { parseSourceFile } from "@doqtor/parser";
+
+const symbols = parseSourceFile("src/index.ts", sourceCode);
+```
+
+Returns an array of `ParsedSymbol` objects with name, kind, parameters, and return type.
+
 ## Development and Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, development commands, and guidelines.
