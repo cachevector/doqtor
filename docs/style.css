@@ -79,6 +79,7 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 80px;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -771,6 +772,18 @@ body {
   box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }
 
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: rgba(0,0,0,0.5);
+}
+
+.sidebar-backdrop.open {
+  display: block;
+}
+
 /* --- Main docs content --- */
 .docs-main {
   flex: 1;
@@ -959,9 +972,35 @@ body {
 }
 
 /* ============================================================
-   Responsive
+   Responsive — Tables
+   Wrap tables in a scrollable container on all sizes
+   ============================================================ */
+.docs-table {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.docs-table thead,
+.docs-table tbody,
+.docs-table tr,
+.docs-table th,
+.docs-table td {
+  white-space: nowrap;
+}
+
+/* re-allow wrapping in description columns */
+.docs-table td:last-child,
+.docs-table th:last-child {
+  white-space: normal;
+  min-width: 180px;
+}
+
+/* ============================================================
+   Responsive — Tablet (max-width: 900px)
    ============================================================ */
 @media (max-width: 900px) {
+  /* Docs sidebar: off-canvas */
   .docs-sidebar {
     transform: translateX(-100%);
     transition: transform 0.25s;
@@ -986,9 +1025,69 @@ body {
   .docs-content {
     padding: 32px 24px 80px;
   }
+
+  .docs-content h1 {
+    font-size: 1.7rem;
+  }
+
+  .docs-content h2 {
+    font-size: 1.35rem;
+  }
+
+  /* Section spacing */
+  .section {
+    padding: 72px 0;
+  }
+
+  .section-title {
+    font-size: 1.8rem;
+  }
+
+  /* Hero adjustments */
+  .hero {
+    padding: 100px 20px 64px;
+  }
+
+  .hero-logo {
+    width: 150px;
+    height: 150px;
+  }
+
+  .hero-glow {
+    width: 400px;
+    height: 400px;
+  }
+
+  /* Feature grid: still 2-col on tablets */
+  .feature-card {
+    padding: 24px;
+  }
+
+  /* Pipeline */
+  .pipeline-step { gap: 18px; }
+  .step-num { font-size: 1.5rem; min-width: 40px; }
+  .pipeline-connector { margin-left: 51px; }
+
+  /* Quick start */
+  .quickstart-card {
+    padding: 24px;
+  }
+
+  /* CTA */
+  .cta-logo {
+    width: 60px;
+    height: 60px;
+  }
 }
 
+/* ============================================================
+   Responsive — Mobile landscape / small tablet (max-width: 768px)
+   ============================================================ */
 @media (max-width: 768px) {
+  /* Uniform horizontal padding across all sections */
+  .container { padding: 0 20px; }
+
+  /* Nav: hamburger menu */
   .nav-links {
     display: none;
     position: absolute;
@@ -1011,39 +1110,245 @@ body {
   .nav-hamburger.open span:nth-child(2) { opacity: 0; }
   .nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
 
+  /* Grids stack to 1 column */
   .feature-grid { grid-template-columns: 1fr; }
   .quickstart-grid { grid-template-columns: 1fr; }
 
-  .hero-logo { width: 140px; height: 140px; }
-
-  .section { padding: 64px 0; }
-
-  .pipeline-step { gap: 16px; }
-  .step-num { font-size: 1.4rem; min-width: 36px; }
-  .pipeline-connector { margin-left: 47px; }
-
-  .footer-inner {
-    flex-direction: column;
-    text-align: center;
+  /* Hero — match container padding */
+  .hero {
+    min-height: auto;
+    padding: 100px 20px 60px;
   }
 
+  .hero-logo { width: 130px; height: 130px; }
+
+  .hero h1 {
+    font-size: clamp(1.6rem, 6vw, 2.4rem);
+  }
+
+  .hero-sub {
+    font-size: 1rem;
+    margin-bottom: 28px;
+  }
+
+  .hero-glow {
+    width: 320px;
+    height: 320px;
+  }
+
+  /* Section titles: left-align on mobile for consistency */
+  .section-title {
+    text-align: left;
+    font-size: 1.6rem;
+  }
+
+  .section-sub {
+    text-align: left;
+    font-size: 0.95rem;
+    margin: 0 0 32px;
+  }
+
+  /* Install box */
   .install-command {
     font-size: 0.85rem;
     padding: 12px 16px;
   }
-}
 
-@media (max-width: 480px) {
-  .hero h1 { font-size: 1.7rem; }
-  .hero-sub { font-size: 1rem; }
-  .hero-logo { width: 120px; height: 120px; }
+  .install-label {
+    font-size: 0.7rem;
+  }
 
-  .terminal-box { font-size: 0.75rem; }
-  .terminal-box pre { padding: 12px 14px; }
-
-  .install-command {
-    font-size: 0.78rem;
-    padding: 10px 14px;
+  /* Buttons */
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
     gap: 10px;
   }
+
+  .btn {
+    width: 100%;
+    max-width: 280px;
+    justify-content: center;
+  }
+
+  /* CTA — left-align to match other sections */
+  .cta-container {
+    text-align: left;
+  }
+
+  .cta-logo {
+    margin-bottom: 20px;
+  }
+
+  .cta-container .hero-actions {
+    align-items: flex-start;
+  }
+
+  /* Sections */
+  .section { padding: 56px 0; }
+
+  /* Pipeline */
+  .pipeline-step { gap: 16px; }
+  .step-num { font-size: 1.4rem; min-width: 36px; }
+  .pipeline-connector { margin-left: 47px; height: 24px; }
+
+  /* Feature cards */
+  .feature-card { padding: 24px; }
+  .feature-card h3 { font-size: 1rem; }
+  .feature-card p { font-size: 0.85rem; }
+
+  /* Footer — compact single row on mobile */
+  .footer { padding: 24px 0; }
+
+  .footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .footer-links {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer-copy {
+    font-size: 0.75rem;
+  }
+
+  /* Terminal boxes */
+  .terminal-box { font-size: 0.8rem; }
+  .terminal-box pre { padding: 12px 14px; }
+  .terminal-title { font-size: 0.65rem; }
+
+  /* Docs page content */
+  .docs-content {
+    padding: 24px 20px 80px;
+  }
+
+  .docs-content h1 { font-size: 1.5rem; }
+  .docs-content h2 { font-size: 1.25rem; }
+  .docs-content h3 { font-size: 1.05rem; margin-top: 24px; }
+
+  .docs-divider { margin: 36px 0; }
+
+  /* Architecture diagram: smaller font */
+  .arch { font-size: 0.6rem; }
+}
+
+/* ============================================================
+   Responsive — Mobile portrait (max-width: 480px)
+   ============================================================ */
+@media (max-width: 480px) {
+  .container { padding: 0 16px; }
+
+  /* Hero — match container 16px */
+  .hero { padding: 88px 16px 48px; }
+  .hero-logo { width: 100px; height: 100px; margin-bottom: 24px; }
+  .hero h1 { font-size: 1.5rem; margin-bottom: 14px; }
+  .hero-sub { font-size: 0.9rem; margin-bottom: 24px; }
+
+  .hero-glow {
+    width: 250px;
+    height: 250px;
+  }
+
+  /* Install box */
+  .install-command {
+    font-size: 0.75rem;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .hero-install { margin-bottom: 24px; }
+  .install-label { font-size: 0.65rem; }
+
+  /* Sections */
+  .section { padding: 44px 0; }
+  .section-title { font-size: 1.35rem; }
+  .section-sub { font-size: 0.88rem; margin-bottom: 28px; }
+
+  /* Feature cards */
+  .feature-card { padding: 20px; }
+  .feature-icon { width: 38px; height: 38px; margin-bottom: 14px; }
+  .feature-icon svg { width: 20px; height: 20px; }
+  .feature-example { font-size: 0.72rem; padding: 8px 10px; }
+
+  /* Pipeline */
+  .step-num { font-size: 1.2rem; min-width: 30px; }
+  .step-content h3 { font-size: 0.95rem; }
+  .step-content p { font-size: 0.82rem; }
+  .pipeline-connector { margin-left: 41px; height: 20px; }
+
+  /* Quick start */
+  .quickstart-card { padding: 20px; }
+  .quickstart-card h3 { font-size: 1rem; margin-bottom: 14px; }
+  .quickstart-note { font-size: 0.8rem; }
+  .tag { font-size: 0.6rem; padding: 2px 8px; }
+
+  /* Terminal boxes */
+  .terminal-box { font-size: 0.72rem; border-radius: 8px; }
+  .terminal-box pre { padding: 10px 12px; }
+  .terminal-header { padding: 8px 12px; }
+  .terminal-dots span { width: 8px; height: 8px; }
+  .terminal-title { font-size: 0.6rem; margin-right: 24px; }
+
+  /* CTA */
+  .cta-logo { width: 52px; height: 52px; margin-bottom: 18px; }
+
+  /* Footer */
+  .footer { padding: 20px 0; }
+  .footer-inner { gap: 10px; }
+  .footer-brand { font-size: 0.9rem; }
+  .footer-logo { width: 22px; height: 22px; }
+  .footer-links a { font-size: 0.8rem; }
+  .footer-links { gap: 14px; }
+  .footer-copy { font-size: 0.72rem; }
+
+  /* Nav */
+  .nav-inner { height: 56px; }
+  .nav-logo { width: 28px; height: 28px; }
+  .nav-name { font-size: 1rem; }
+  .nav-links { top: 56px; padding: 16px 16px; gap: 14px; }
+
+  /* Docs page */
+  .docs-layout { padding-top: 56px; }
+  .docs-sidebar { top: 56px; }
+  .docs-content { padding: 20px 16px 72px; }
+  .docs-content h1 { font-size: 1.35rem; }
+  .docs-content h2 { font-size: 1.15rem; }
+  .docs-content h3 { font-size: 0.95rem; }
+  .docs-content > section > p,
+  .docs-content li { font-size: 0.85rem; }
+  .docs-divider { margin: 28px 0; }
+
+  /* Architecture diagram */
+  .arch { font-size: 0.48rem; }
+
+  /* Docs tables */
+  .docs-table th,
+  .docs-table td {
+    padding: 8px 10px;
+    font-size: 0.78rem;
+  }
+
+  /* Sidebar toggle */
+  .sidebar-toggle {
+    bottom: 16px;
+    left: 16px;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+}
+
+/* ============================================================
+   Responsive — Very small screens (max-width: 360px)
+   ============================================================ */
+@media (max-width: 360px) {
+  .hero h1 { font-size: 1.3rem; }
+  .hero-logo { width: 80px; height: 80px; }
+  .install-command { font-size: 0.68rem; padding: 8px 10px; }
+  .section-title { font-size: 1.2rem; }
+  .feature-card { padding: 16px; }
+  .arch { font-size: 0.42rem; }
 }

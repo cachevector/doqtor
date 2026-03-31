@@ -118,15 +118,36 @@
   var sidebarToggle = document.getElementById("sidebar-toggle");
 
   if (sidebar && sidebarToggle) {
+    // Create backdrop overlay for mobile sidebar
+    var backdrop = document.createElement("div");
+    backdrop.className = "sidebar-backdrop";
+    document.body.appendChild(backdrop);
+
+    function openSidebar() {
+      sidebar.classList.add("open");
+      backdrop.classList.add("open");
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove("open");
+      backdrop.classList.remove("open");
+    }
+
     sidebarToggle.addEventListener("click", function () {
-      sidebar.classList.toggle("open");
+      if (sidebar.classList.contains("open")) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
     });
+
+    backdrop.addEventListener("click", closeSidebar);
 
     // Close sidebar on link click (mobile)
     sidebar.querySelectorAll(".sidebar-link").forEach(function (link) {
       link.addEventListener("click", function () {
         if (window.innerWidth <= 900) {
-          sidebar.classList.remove("open");
+          closeSidebar();
         }
       });
     });
