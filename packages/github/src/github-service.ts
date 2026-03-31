@@ -77,8 +77,15 @@ export class GitHubService {
       }),
     );
 
+    const patchesByFile = new Map<string, DocPatch[]>();
     for (const patch of patches) {
-      await this.commitPatch(owner, repo, branchName, patch);
+      const existing = patchesByFile.get(patch.filePath) ?? [];
+      existing.push(patch);
+      patchesByFile.set(patch.filePath, existing);
+    }
+
+    for (const [filePath, filePatches] of patchesByFile) {
+      await this.commitFilePatches(owner, repo, branchName, filePath, filePatches);
     }
 
     const { data: pr } = await this.withRetry(() =>
@@ -95,11 +102,12 @@ export class GitHubService {
     return { prNumber: pr.number, prUrl: pr.html_url };
   }
 
-  private async commitPatch(
+  private async commitFilePatches(
     owner: string,
     repo: string,
     branch: string,
-    patch: DocPatch,
+    filePath: string,
+    patches: DocPatch[],
   ): Promise<void> {
     let existingSha: string | undefined;
 
@@ -107,7 +115,7 @@ export class GitHubService {
       const { data } = await this.octokit.repos.getContent({
         owner,
         repo,
-        path: patch.filePath,
+        path: filePath,
         ref: branch,
       });
 
@@ -118,21 +126,23 @@ export class GitHubService {
       // File doesn't exist yet
     }
 
-    const currentContent = existingSha
-      ? await this.getFileContent(owner, repo, patch.filePath, branch)
+    let content = existingSha
+      ? await this.getFileContent(owner, repo, filePath, branch)
       : null;
 
-    const newContent = currentContent
-      ? currentContent.replace(patch.oldText, patch.newText)
-      : patch.newText;
+    for (const patch of patches) {
+      content = content
+        ? content.replace(patch.oldText, patch.newText)
+        : patch.newText;
+    }
 
     await this.withRetry(() =>
       this.octokit.repos.createOrUpdateFileContents({
         owner,
         repo,
-        path: patch.filePath,
-        message: `docs: update ${patch.filePath}`,
-        content: Buffer.from(newContent).toString("base64"),
+        path: filePath,
+        message: `docs: update ${filePath}`,
+        content: Buffer.from(content!).toString("base64"),
         branch,
         sha: existingSha,
       }),
