@@ -8,4 +8,13 @@ export default defineConfig({
   banner: {
     js: "#!/usr/bin/env node",
   },
+  noExternal: [
+    "@doqtor/core-engine",
+    "@doqtor/fixer",
+    "@doqtor/matcher",
+    "@doqtor/parser",
+  ],
+  external: [
+    "ts-morph",
+  ],
 });

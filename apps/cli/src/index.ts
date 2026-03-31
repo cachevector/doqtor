@@ -11,7 +11,7 @@ const program = new Command();
 program
   .name("doqtor")
   .description("Keep your docs in sync with your code")
-  .version("0.0.1");
+  .version("0.1.1");
 
 program
   .command("check")

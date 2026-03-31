@@ -106,7 +106,7 @@
 - [x] Structured logging (repo, PR number, pipeline stage)
 - [x] Error handling: log failures, don't crash on bad input
 - [x] Health check endpoint
-- [ ] Deploy to Railway
+- [x] Deploy to Railway
 
 ---
 
@@ -116,7 +116,7 @@
 - [x] Edge cases: empty diffs, binary files, .d.ts files, no docs found
 - [x] Edge cases: arrow functions, generics, overloads, constructors
 - [x] Webhook event parsing tests
-- [ ] Test against real open-source repos (manual validation)
+- [x] Test against real open-source repos (manual validation)
 
 ---
 
@@ -127,8 +127,8 @@
 - [x] Example `doqtor.config.json` in repo
 - [x] `.env.example` for backend
 - [ ] GitHub App manifest for easy installation
-- [ ] npm publish CLI package
-- [ ] Deploy backend, verify on a real repo
+- [x] npm publish CLI package (`@doqtor/cli` on npm)
+- [x] Deploy backend, verify on a real repo
 
 ---
 
