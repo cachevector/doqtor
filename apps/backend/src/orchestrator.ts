@@ -48,7 +48,7 @@ export async function orchestrate(input: OrchestratorInput): Promise<void> {
   const changeSets = await analyzeDiff({
     diff,
     getFileContent: async (path, ref) => {
-      const gitRef = ref === "old" ? input.baseBranch : `refs/pull/${input.prNumber}/merge`;
+      const gitRef = ref === "old" ? `${input.baseBranch}~1` : input.baseBranch;
       return github.getFileContent(input.owner, input.repo, path, gitRef);
     },
     parseFn: parseSourceFile,
