@@ -1,6 +1,6 @@
 import { analyzeDiff, detectDrift } from "@doqtor/core-engine";
 import type { DriftReport, DocPatch, DoqtorConfig } from "@doqtor/core-engine";
-import { parseSourceFile } from "@doqtor/parser";
+import { parseSource } from "@doqtor/parser";
 import { matchDocs } from "@doqtor/matcher";
 import { generateFixes } from "@doqtor/fixer";
 import { getGitDiff, getFileContent } from "./git.js";
@@ -19,7 +19,7 @@ export async function runCheck(
   const changeSets = await analyzeDiff({
     diff,
     getFileContent: async (path, ref) => getFileContent(path, ref, cwd),
-    parseFn: parseSourceFile,
+    parseFn: parseSource,
   });
 
   if (changeSets.length === 0) {

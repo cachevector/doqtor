@@ -1,13 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { parseSourceFile } from "../parser.js";
+import { parseSource } from "../parser.js";
 
-describe("parseSourceFile", () => {
+describe("parseSource", () => {
   describe("functions", () => {
     it("extracts a simple function", () => {
       const code = `export function greet(name: string): string {
         return "hello " + name;
       }`;
-      const symbols = parseSourceFile("test.ts", code);
+      const symbols = parseSource("test.ts", code);
 
       expect(symbols).toHaveLength(1);
       expect(symbols[0]).toMatchObject({
@@ -27,7 +27,7 @@ describe("parseSourceFile", () => {
 
     it("extracts functions with optional and default parameters", () => {
       const code = `export function create(name: string, age?: number, active = true) {}`;
-      const symbols = parseSourceFile("test.ts", code);
+      const symbols = parseSource("test.ts", code);
 
       expect(symbols[0]!.parameters).toHaveLength(3);
       expect(symbols[0]!.parameters![0]).toMatchObject({ name: "name", optional: false });
@@ -39,14 +39,21 @@ describe("parseSourceFile", () => {
       });
     });
 
-    it("extracts non-exported functions", () => {
+    it("extracts non-exported functions with includePrivate", () => {
       const code = `function internal() {}`;
-      const symbols = parseSourceFile("test.ts", code);
+      const symbols = parseSource("test.ts", code, true);
 
       expect(symbols[0]).toMatchObject({
         name: "internal",
         exported: false,
       });
+    });
+
+    it("excludes non-exported functions by default", () => {
+      const code = `function internal() {}`;
+      const symbols = parseSource("test.ts", code);
+
+      expect(symbols).toHaveLength(0);
     });
   });
 
@@ -56,7 +63,7 @@ describe("parseSourceFile", () => {
         create(email: string): void {}
         delete(id: number): boolean { return true; }
       }`;
-      const symbols = parseSourceFile("test.ts", code);
+      const symbols = parseSource("test.ts", code);
 
       expect(symbols).toHaveLength(3);
       expect(symbols[0]).toMatchObject({ name: "UserService", kind: "class", exported: true });
@@ -76,7 +83,7 @@ describe("parseSourceFile", () => {
         id: number;
         name: string;
       }`;
-      const symbols = parseSourceFile("test.ts", code);
+      const symbols = parseSource("test.ts", code);
 
       expect(symbols).toHaveLength(1);
       expect(symbols[0]).toMatchObject({
@@ -90,7 +97,7 @@ describe("parseSourceFile", () => {
   describe("type aliases", () => {
     it("extracts type aliases", () => {
       const code = `export type Status = "active" | "inactive";`;
-      const symbols = parseSourceFile("test.ts", code);
+      const symbols = parseSource("test.ts", code);
 
       expect(symbols).toHaveLength(1);
       expect(symbols[0]).toMatchObject({
@@ -104,7 +111,7 @@ describe("parseSourceFile", () => {
   describe("constants", () => {
     it("extracts exported constants", () => {
       const code = `export const MAX_RETRIES = 3;`;
-      const symbols = parseSourceFile("test.ts", code);
+      const symbols = parseSource("test.ts", code);
 
       expect(symbols).toHaveLength(1);
       expect(symbols[0]).toMatchObject({
@@ -116,7 +123,7 @@ describe("parseSourceFile", () => {
 
     it("extracts multiple declarations in one statement", () => {
       const code = `export const A = 1, B = 2;`;
-      const symbols = parseSourceFile("test.ts", code);
+      const symbols = parseSource("test.ts", code);
 
       expect(symbols).toHaveLength(2);
       expect(symbols[0]).toMatchObject({ name: "A", kind: "constant" });
@@ -134,7 +141,7 @@ describe("parseSourceFile", () => {
 export function createUser(name: string) {
   return { name };
 }`;
-      const symbols = parseSourceFile("test.ts", code);
+      const symbols = parseSource("test.ts", code);
 
       expect(symbols[0]!.jsDoc).toContain("Creates a new user");
       expect(symbols[0]!.jsDoc).toContain("@param name");
@@ -142,7 +149,7 @@ export function createUser(name: string) {
 
     it("returns undefined when no JSDoc present", () => {
       const code = `export function noDoc() {}`;
-      const symbols = parseSourceFile("test.ts", code);
+      const symbols = parseSource("test.ts", code);
 
       expect(symbols[0]!.jsDoc).toBeUndefined();
     });
@@ -168,7 +175,7 @@ export class ApiClient {
 
 function internalHelper() {}
 `;
-      const symbols = parseSourceFile("api.ts", code);
+      const symbols = parseSource("api.ts", code);
 
       const names = symbols.map((s) => s.name);
       expect(names).toContain("Config");
@@ -176,8 +183,8 @@ function internalHelper() {}
       expect(names).toContain("DEFAULT_TIMEOUT");
       expect(names).toContain("ApiClient");
       expect(names).toContain("ApiClient.send");
-      expect(names).toContain("internalHelper");
-      expect(symbols).toHaveLength(6);
+      expect(names).not.toContain("internalHelper");
+      expect(symbols).toHaveLength(5);
     });
   });
 });
