@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation - doqtor</title>
+  <meta name="description" content="Doqtor documentation: CLI reference, configuration, API, GitHub App setup, architecture, and contributing guide.">
+  <link rel="icon" href="logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="docs-page">
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        <img src="logo.png" alt="doqtor logo" class="nav-logo">
+        <span class="nav-name">doqtor</span>
+      </a>
+      <div class="nav-links" id="nav-links">
+        <a href="index.html">Home</a>
+        <a href="docs.html" class="active">Docs</a>
+        <a href="https://github.com/cachevector/doqtor" target="_blank" rel="noopener" class="nav-github" aria-label="GitHub">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        </a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+          <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+      </div>
+      <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Docs Layout -->
+  <div class="docs-layout">
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" id="docs-sidebar">
+      <div class="sidebar-inner">
+        <div class="sidebar-section">
+          <div class="sidebar-heading">Getting Started</div>
+          <a href="#installation" class="sidebar-link active">Installation</a>
+          <a href="#configuration" class="sidebar-link">Configuration</a>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-heading">CLI</div>
+          <a href="#cli-check" class="sidebar-link">doqtor check</a>
+          <a href="#cli-fix" class="sidebar-link">doqtor fix</a>
+          <a href="#cli-init" class="sidebar-link">doqtor init</a>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-heading">API Reference</div>
+          <a href="#api-parser" class="sidebar-link">@doqtor/parser</a>
+          <a href="#api-core" class="sidebar-link">@doqtor/core-engine</a>
+          <a href="#api-matcher" class="sidebar-link">@doqtor/matcher</a>
+          <a href="#api-fixer" class="sidebar-link">@doqtor/fixer</a>
+          <a href="#api-types" class="sidebar-link">Core Types</a>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-heading">GitHub App</div>
+          <a href="#github-setup" class="sidebar-link">Setup</a>
+          <a href="#github-deploy" class="sidebar-link">Deploy</a>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-heading">Project</div>
+          <a href="#architecture" class="sidebar-link">Architecture</a>
+          <a href="#contributing" class="sidebar-link">Contributing</a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Sidebar toggle for mobile -->
+    <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+    </button>
+
+    <!-- Main content -->
+    <main class="docs-main">
+      <div class="docs-content">
+
+        <!-- Installation -->
+        <section id="installation">
+          <h1>Installation</h1>
+          <p>Install doqtor globally from npm:</p>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <div class="terminal-dots"><span></span><span></span><span></span></div>
+              <div class="terminal-title">terminal</div>
+            </div>
+            <pre><code><span class="prompt">$</span> npm install -g @doqtor/cli</code></pre>
+          </div>
+          <p>Or run directly with npx:</p>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <div class="terminal-dots"><span></span><span></span><span></span></div>
+              <div class="terminal-title">terminal</div>
+            </div>
+            <pre><code><span class="prompt">$</span> npx @doqtor/cli check</code></pre>
+          </div>
+          <p>Then initialize a config file in your project:</p>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <div class="terminal-dots"><span></span><span></span><span></span></div>
+              <div class="terminal-title">terminal</div>
+            </div>
+            <pre><code><span class="prompt">$</span> doqtor init
+<span class="dim">Created doqtor.config.json</span></code></pre>
+          </div>
+        </section>
+
+        <hr class="docs-divider">
+
+        <!-- Configuration -->
+        <section id="configuration">
+          <h2>Configuration</h2>
+          <p>Create a <code>doqtor.config.json</code> in your project root (or run <code>doqtor init</code>):</p>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <div class="terminal-dots"><span></span><span></span><span></span></div>
+              <div class="terminal-title">doqtor.config.json</div>
+            </div>
+            <pre><code>{
+  <span class="str">"docsPaths"</span>: [<span class="str">"README.md"</span>, <span class="str">"docs/"</span>],
+  <span class="str">"ignore"</span>: [<span class="str">"node_modules/"</span>, <span class="str">"dist/"</span>, <span class="str">".git/"</span>],
+  <span class="str">"ai"</span>: {
+    <span class="str">"enabled"</span>: <span class="kw">false</span>,
+    <span class="str">"provider"</span>: <span class="str">"openai"</span>
+  },
+  <span class="str">"autoPR"</span>: <span class="kw">true</span>
+}</code></pre>
+          </div>
+
+          <table class="docs-table">
+            <thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>docsPaths</code></td><td><code>string[]</code></td><td><code>["README.md", "docs/"]</code></td><td>Files and directories to scan for documentation</td></tr>
+              <tr><td><code>ignore</code></td><td><code>string[]</code></td><td><code>["node_modules/", "dist/", ".git/"]</code></td><td>Paths to exclude from analysis</td></tr>
+              <tr><td><code>ai.enabled</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Use an LLM for fix generation</td></tr>
+              <tr><td><code>ai.provider</code></td><td><code>string</code></td><td><code>"openai"</code></td><td>AI provider: <code>"openai"</code> or <code>"anthropic"</code></td></tr>
+              <tr><td><code>autoPR</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Automatically create PRs with fixes</td></tr>
+            </tbody>
+          </table>
+
+          <h3>AI-Assisted Fixes</h3>
+          <p>When <code>ai.enabled</code> is <code>true</code>, doqtor uses an LLM to generate more natural documentation fixes beyond simple find-and-replace. Set the appropriate API key as an environment variable:</p>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <div class="terminal-dots"><span></span><span></span><span></span></div>
+              <div class="terminal-title">terminal</div>
+            </div>
+            <pre><code><span class="comment"># For OpenAI</span>
+<span class="prompt">$</span> export OPENAI_API_KEY=sk-...
+
+<span class="comment"># For Anthropic</span>
+<span class="prompt">$</span> export ANTHROPIC_API_KEY=sk-ant-...</code></pre>
+          </div>
+        </section>
+
+        <hr class="docs-divider">
+
+        <!-- CLI Reference -->
+        <section id="cli-check">
+          <h2>CLI Reference</h2>
+          <p>The doqtor CLI runs the drift detection pipeline locally against your git changes.</p>
+
+          <h3><code>doqtor check</code></h3>
+          <p>Analyze local git diff for documentation drift. Exits with code 1 if drift is found.</p>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <div class="terminal-dots"><span></span><span></span><span></span></div>
+              <div class="terminal-title">terminal</div>
+            </div>
+            <pre><code><span class="prompt">$</span> doqtor check
+<span class="prompt">$</span> doqtor check --config path/to/config.json</code></pre>
+          </div>
+          <table class="docs-table">
+            <thead><tr><th>Option</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>-c, --config &lt;path&gt;</code></td><td>Path to a custom config file</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="cli-fix">
+          <h3><code>doqtor fix</code></h3>
+          <p>Detect drift and apply documentation patches. Use <code>--dry-run</code> to preview without writing.</p>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <div class="terminal-dots"><span></span><span></span><span></span></div>
+              <div class="terminal-title">terminal</div>
+            </div>
+            <pre><code><span class="prompt">$</span> doqtor fix
+<span class="prompt">$</span> doqtor fix --dry-run
+<span class="prompt">$</span> doqtor fix --config path/to/config.json</code></pre>
+          </div>
+          <table class="docs-table">
+            <thead><tr><th>Option</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>-c, --config &lt;path&gt;</code></td><td>Path to a custom config file</td></tr>
+              <tr><td><code>--dry-run</code></td><td>Show patches without applying them</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="cli-init">
+          <h3><code>doqtor init</code></h3>
+          <p>Generate a default <code>doqtor.config.json</code> in the current directory.</p>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <div class="terminal-dots"><span></span><span></span><span></span></div>
+              <div class="terminal-title">terminal</div>
+            </div>
+            <pre><code><span class="prompt">$</span> doqtor init</code></pre>
+          </div>
+        </section>
+
+        <hr class="docs-divider">
+
+        <!-- API Reference -->
+        <section id="api-parser">
+          <h2>API Reference</h2>
+          <p>Doqtor's internals are exposed as scoped packages for programmatic use.</p>
+
+          <h3><code>@doqtor/parser</code></h3>
+          <p>Extract symbols from TypeScript source files using AST analysis (ts-morph).</p>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <div class="terminal-dots"><span></span><span></span><span></span></div>
+              <div class="terminal-title">typescript</div>
+            </div>
+            <pre><code><span class="kw">import</span> { parseSource } <span class="kw">from</span> <span class="str">"@doqtor/parser"</span>;
+
+<span class="kw">const</span> symbols = parseSource(<span class="str">"src/index.ts"</span>, sourceCode);
+<span class="comment">// Returns ParsedSymbol[]</span></code></pre>
+          </div>
+        </section>
+
+        <section id="api-core">
+          <h3><code>@doqtor/core-engine</code></h3>
+          <p>Diff analysis and drift detection.</p>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <div class="terminal-dots"><span></span><span></span><span></span></div>
+              <div class="terminal-title">typescript</div>
+            </div>
+            <pre><code><span class="kw">import</span> { analyzeDiff } <span class="kw">from</span> <span class="str">"@doqtor/core-engine"</span>;
+<span class="kw">import</span> { detectDrift } <span class="kw">from</span> <span class="str">"@doqtor/core-engine"</span>;
+
+<span class="kw">const</span> changeSets = analyzeDiff(unifiedDiff, parseSource);
+<span class="kw">const</span> report = detectDrift(changeSets, docReferences);</code></pre>
+          </div>
+        </section>
+
+        <section id="api-matcher">
+          <h3><code>@doqtor/matcher</code></h3>
+          <p>Maps code changes to documentation references.</p>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <div class="terminal-dots"><span></span><span></span><span></span></div>
+              <div class="terminal-title">typescript</div>
+            </div>
+            <pre><code><span class="kw">import</span> { matchDocs } <span class="kw">from</span> <span class="str">"@doqtor/matcher"</span>;
+
+<span class="kw">const</span> refs = matchDocs(changeSets, docFiles);</code></pre>
+          </div>
+        </section>
+
+        <section id="api-fixer">
+          <h3><code>@doqtor/fixer</code></h3>
+          <p>Generates documentation patches from drift reports.</p>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <div class="terminal-dots"><span></span><span></span><span></span></div>
+              <div class="terminal-title">typescript</div>
+            </div>
+            <pre><code><span class="kw">import</span> { generateFixes } <span class="kw">from</span> <span class="str">"@doqtor/fixer"</span>;
+
+<span class="kw">const</span> patches = <span class="kw">await</span> generateFixes(report, config);</code></pre>
+          </div>
+        </section>
+
+        <section id="api-types">
+          <h3>Core Types</h3>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <div class="terminal-dots"><span></span><span></span><span></span></div>
+              <div class="terminal-title">types.ts</div>
+            </div>
+            <pre><code><span class="kw">interface</span> <span class="type">ParsedSymbol</span> {
+  name: <span class="type">string</span>;
+  kind: <span class="str">"function"</span> | <span class="str">"class"</span> | <span class="str">"interface"</span> | <span class="str">"type"</span> | <span class="str">"constant"</span> | <span class="str">"method"</span>;
+  filePath: <span class="type">string</span>;
+  line: <span class="type">number</span>;
+  parameters?: <span class="type">ParameterInfo</span>[];
+  returnType?: <span class="type">string</span>;
+  jsDoc?: <span class="type">string</span>;
+  exported: <span class="type">boolean</span>;
+}
+
+<span class="kw">interface</span> <span class="type">DriftItem</span> {
+  type: <span class="str">"signature-mismatch"</span> | <span class="str">"removed-symbol"</span>
+      | <span class="str">"outdated-example"</span> | <span class="str">"renamed-symbol"</span>;
+  symbolName: <span class="type">string</span>;
+  docReference: <span class="type">DocReference</span>;
+  oldValue: <span class="type">string</span>;
+  newValue: <span class="type">string</span>;
+  confidence: <span class="type">number</span>;
+}
+
+<span class="kw">interface</span> <span class="type">DocPatch</span> {
+  filePath: <span class="type">string</span>;
+  lineStart: <span class="type">number</span>;
+  lineEnd: <span class="type">number</span>;
+  oldText: <span class="type">string</span>;
+  newText: <span class="type">string</span>;
+  driftItem: <span class="type">DriftItem</span>;
+}
+
+<span class="kw">interface</span> <span class="type">DoqtorConfig</span> {
+  docsPaths: <span class="type">string</span>[];
+  ignore: <span class="type">string</span>[];
+  ai: { enabled: <span class="type">boolean</span>; provider?: <span class="str">"openai"</span> | <span class="str">"anthropic"</span> };
+  autoPR: <span class="type">boolean</span>;
+}</code></pre>
+          </div>
+        </section>
+
+        <hr class="docs-divider">
+
+        <!-- GitHub App -->
+        <section id="github-setup">
+          <h2>GitHub App</h2>
+          <p>Run doqtor as a GitHub App to automatically fix docs when PRs merge.</p>
+
+          <h3>1. Create a GitHub App</h3>
+          <ol>
+            <li>Go to <strong>GitHub Settings &rarr; Developer settings &rarr; GitHub Apps &rarr; New GitHub App</strong></li>
+            <li>Set the webhook URL to your deployed backend (e.g. <code>https://your-server.com/webhook</code>)</li>
+            <li>Subscribe to <strong>Pull request</strong> events</li>
+            <li>Required permissions:
+              <ul>
+                <li><strong>Contents</strong>: Read &amp; Write (to create branches and commits)</li>
+                <li><strong>Pull requests</strong>: Read &amp; Write (to create fix PRs)</li>
+              </ul>
+            </li>
+            <li>Generate a private key and download it</li>
+          </ol>
+
+          <h3>2. Configure Environment</h3>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <div class="terminal-dots"><span></span><span></span><span></span></div>
+              <div class="terminal-title">.env</div>
+            </div>
+            <pre><code>GITHUB_APP_ID=123456
+GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n..."
+GITHUB_WEBHOOK_SECRET=your-webhook-secret
+PORT=3000
+LOG_LEVEL=info</code></pre>
+          </div>
+        </section>
+
+        <section id="github-deploy">
+          <h3>3. Deploy</h3>
+          <p>The backend is a standard Node.js/Bun server. Deploy to any platform:</p>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <div class="terminal-dots"><span></span><span></span><span></span></div>
+              <div class="terminal-title">terminal</div>
+            </div>
+            <pre><code><span class="comment"># Build and start</span>
+<span class="prompt">$</span> bun install
+<span class="prompt">$</span> bun run build
+<span class="prompt">$</span> bun run --cwd apps/backend src/index.ts</code></pre>
+          </div>
+
+          <h3>4. Install on Repos</h3>
+          <p>Install your GitHub App on the repositories you want doqtor to monitor. Add a <code>doqtor.config.json</code> to each repo's root.</p>
+        </section>
+
+        <hr class="docs-divider">
+
+        <!-- Architecture -->
+        <section id="architecture">
+          <h2>Architecture</h2>
+          <p>Doqtor is a monorepo built with Turborepo and Bun workspaces.</p>
+
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <div class="terminal-dots"><span></span><span></span><span></span></div>
+              <div class="terminal-title">architecture</div>
+            </div>
+            <pre><code class="arch">
+                  +------------------+
+                  |   GitHub Webhook |
+                  +--------+---------+
+                           |
+                  +--------v---------+
+                  |  apps/backend    |
+                  |  (Hono server)   |
+                  +--------+---------+
+                           |
+            +--------------+--------------+
+            |              |              |
+   +--------v---+  +------v------+  +----v-------+
+   | @doqtor/   |  | @doqtor/    |  | @doqtor/   |
+   | parser     |  | core-engine |  | matcher    |
+   | (ts-morph) |  | (diff+drift)|  | (doc scan) |
+   +--------+---+  +------+------+  +----+-------+
+            |              |              |
+            +--------------+--------------+
+                           |
+                  +--------v---------+
+                  |   @doqtor/fixer  |
+                  |  (patch gen)     |
+                  +--------+---------+
+                           |
+                  +--------v---------+
+                  |  @doqtor/github  |
+                  |  (PR creation)   |
+                  +------------------+</code></pre>
+          </div>
+
+          <table class="docs-table">
+            <thead><tr><th>Package</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>packages/parser</code></td><td>TypeScript AST parsing via ts-morph. Extracts functions, classes, interfaces, types.</td></tr>
+              <tr><td><code>packages/core-engine</code></td><td>Shared types, unified diff analysis, drift detection with confidence scoring.</td></tr>
+              <tr><td><code>packages/matcher</code></td><td>Maps changed symbols to documentation file references.</td></tr>
+              <tr><td><code>packages/fixer</code></td><td>Generates doc patches. Supports deterministic and AI-assisted fixes.</td></tr>
+              <tr><td><code>packages/github</code></td><td>GitHub App auth, webhook handling, branch/commit/PR creation.</td></tr>
+              <tr><td><code>apps/backend</code></td><td>Hono webhook server with orchestration pipeline and queue.</td></tr>
+              <tr><td><code>apps/cli</code></td><td>Commander.js CLI for local drift checking and fixing.</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <hr class="docs-divider">
+
+        <!-- Contributing -->
+        <section id="contributing">
+          <h2>Contributing</h2>
+
+          <h3>Prerequisites</h3>
+          <ul>
+            <li><a href="https://bun.sh" target="_blank" rel="noopener">Bun</a> v1.1+</li>
+            <li>Git</li>
+          </ul>
+
+          <h3>Setup</h3>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <div class="terminal-dots"><span></span><span></span><span></span></div>
+              <div class="terminal-title">terminal</div>
+            </div>
+            <pre><code><span class="prompt">$</span> git clone https://github.com/cachevector/doqtor.git
+<span class="prompt">$</span> cd doqtor
+<span class="prompt">$</span> bun install
+<span class="prompt">$</span> bun run build</code></pre>
+          </div>
+
+          <h3>Common Commands</h3>
+          <table class="docs-table">
+            <thead><tr><th>Command</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>bun run dev</code></td><td>Watch mode for all packages</td></tr>
+              <tr><td><code>bun run build</code></td><td>Build all packages</td></tr>
+              <tr><td><code>bun run test</code></td><td>Run all tests</td></tr>
+              <tr><td><code>bun run lint</code></td><td>Lint all packages</td></tr>
+              <tr><td><code>bun run format</code></td><td>Format with Prettier</td></tr>
+              <tr><td><code>bun run typecheck</code></td><td>Type check all packages</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Code Standards</h3>
+          <ul>
+            <li>TypeScript strict mode, no <code>any</code> types</li>
+            <li>Run <code>bun run lint:fix</code> and <code>bun run format</code> before committing</li>
+            <li>Use <code>import type { ... }</code> for type-only imports</li>
+            <li>Prefer small, testable functions over large classes</li>
+            <li>Unit tests required for all new logic</li>
+          </ul>
+
+          <h3>Commit Messages</h3>
+          <p>Follow <a href="https://www.conventionalcommits.org/" target="_blank" rel="noopener">Conventional Commits</a>:</p>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <div class="terminal-dots"><span></span><span></span><span></span></div>
+              <div class="terminal-title">examples</div>
+            </div>
+            <pre><code>feat: add parameter diffing to parser
+fix: handle empty diff input in core-engine
+docs: update CLI usage examples
+test: add matcher edge case tests
+chore: update dependencies</code></pre>
+          </div>
+
+          <h3>Workflow</h3>
+          <ol>
+            <li>Create a branch from <code>master</code></li>
+            <li>Make your changes</li>
+            <li>Write or update tests</li>
+            <li>Ensure all checks pass: <code>bun run test && bun run lint && bun run typecheck</code></li>
+            <li>Submit a pull request</li>
+          </ol>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer docs-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <img src="logo.png" alt="doqtor" class="footer-logo">
+          <span>doqtor</span>
+        </div>
+        <div class="footer-links">
+          <a href="index.html">Home</a>
+          <a href="https://github.com/cachevector/doqtor" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://www.npmjs.com/package/@doqtor/cli" target="_blank" rel="noopener">npm</a>
+          <a href="https://github.com/cachevector/doqtor/issues" target="_blank" rel="noopener">Issues</a>
+        </div>
+        <p class="footer-copy">MIT License</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
