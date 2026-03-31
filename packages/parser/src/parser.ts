@@ -3,7 +3,7 @@ import type { ParsedSymbol, ParameterInfo } from "@doqtor/core-engine";
 
 const project = new Project({ useInMemoryFileSystem: true });
 
-export function parseSourceFile(filePath: string, content: string): ParsedSymbol[] {
+export function parseSourceFile(filePath: string, content: string, includePrivate: boolean = false): ParsedSymbol[] {
   const sourceFile = project.createSourceFile(filePath, content, { overwrite: true });
   const symbols: ParsedSymbol[] = [];
 
@@ -13,6 +13,9 @@ export function parseSourceFile(filePath: string, content: string): ParsedSymbol
   symbols.push(...extractTypeAliases(sourceFile, filePath));
   symbols.push(...extractConstants(sourceFile, filePath));
 
+  if (!includePrivate) {
+    return symbols.filter((s) => s.exported);
+  }
   return symbols;
 }
 
