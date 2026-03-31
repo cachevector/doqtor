@@ -95,9 +95,9 @@ Create a `doqtor.config.json` in your project root:
 Use `parseSource(filePath, content)` to extract symbols from a TypeScript file:
 
 ```ts
-import { parseSourceFile } from "@doqtor/parser";
+import { parseSource } from "@doqtor/parser";
 
-const symbols = parseSourceFile("src/index.ts", sourceCode);
+const symbols = parseSource("src/index.ts", sourceCode);
 ```
 
 Returns an array of `ParsedSymbol` objects with name, kind, parameters, and return type.
