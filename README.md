@@ -1,6 +1,19 @@
-# doqtor
+<p align="center">
+  <img src="docs/logo.png" alt="Doqtor" width="150" />
+</p>
 
-Your docs are lying. Doqtor keeps them in sync with your code, automatically.
+<h1 align="center">doqtor</h1>
+
+<p align="center">
+  Your docs are lying. Doqtor keeps them in sync with your code, automatically.
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@doqtor/cli"><img src="https://img.shields.io/npm/v/@doqtor/cli" alt="npm version" /></a>
+  <a href="https://github.com/cachevector/doqtor/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="license" /></a>
+</p>
+
+---
 
 Doqtor detects documentation drift after code changes and opens pull requests with fixes. It doesn't generate docs from scratch. It makes sure your existing docs stay correct.
 
@@ -11,7 +24,7 @@ Documentation goes stale the moment code changes. Developers update function sig
 ## How It Works
 
 ```
-PR Merged > Webhook > Diff Analysis > Doc Matching > Drift Detection > Fix Generation > Docs PR
+PR Merged → Webhook → Diff Analysis → Doc Matching → Drift Detection → Fix Generation → Docs PR
 ```
 
 1. A PR merges into your repo
@@ -37,23 +50,48 @@ Each detection includes a confidence score so reviewers can prioritize.
 
 ### CLI
 
+Install from npm:
+
 ```bash
-# Check for documentation drift in your local changes
-bun run --cwd apps/cli src/index.ts check
-
-# Apply fixes
-bun run --cwd apps/cli src/index.ts fix
-
-# Preview fixes without applying
-bun run --cwd apps/cli src/index.ts fix --dry-run
-
-# Generate a default config file
-bun run --cwd apps/cli src/index.ts init
+npm install -g @doqtor/cli
 ```
 
-### GitHub App (Backend)
+Then run in any git repo with documentation:
 
 ```bash
+# Check for documentation drift in your local changes
+doqtor check
+
+# Apply fixes
+doqtor fix
+
+# Preview fixes without applying
+doqtor fix --dry-run
+
+# Generate a default config file
+doqtor init
+```
+
+Or use without installing:
+
+```bash
+npx @doqtor/cli check
+```
+
+### GitHub App
+
+Install the [Doqtor GitHub App](https://github.com/apps/doqtor-bot) on your repository. Once installed, Doqtor automatically monitors merged PRs and creates follow-up PRs when documentation drift is detected.
+
+### Self-Hosting
+
+To run your own instance of the backend:
+
+```bash
+git clone https://github.com/cachevector/doqtor.git
+cd doqtor
+bun install
+bun run build
+
 # Copy and configure environment
 cp .env.example .env
 # Edit .env with your GitHub App credentials
@@ -61,8 +99,6 @@ cp .env.example .env
 # Start the webhook server
 bun run --cwd apps/backend dev
 ```
-
-The backend listens for `pull_request.closed` webhook events and runs the full pipeline when a PR is merged.
 
 ## Configuration
 

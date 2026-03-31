@@ -28,15 +28,21 @@ bun run typecheck
 
 Monorepo managed with Turborepo and Bun workspaces.
 
-| Package | Description |
-|---------|-------------|
-| `packages/core-engine` | Shared types, diff analyzer, drift detector |
-| `packages/parser` | TypeScript AST parsing |
-| `packages/matcher` | Maps code changes to documentation files |
-| `packages/fixer` | Generates documentation fixes |
-| `packages/github` | GitHub App integration |
-| `apps/backend` | Webhook server |
-| `apps/cli` | CLI tool |
+```
+doqtor/
+├── apps/
+│   ├── backend/         Hono webhook server (deployed on Railway)
+│   └── cli/             CLI tool (published as @doqtor/cli on npm)
+├── packages/
+│   ├── core-engine/     Shared types, diff analyzer, drift detector
+│   ├── parser/          TypeScript AST parsing via ts-morph
+│   ├── matcher/         Maps code changes to documentation files
+│   ├── fixer/           Generates documentation fixes (deterministic + AI)
+│   └── github/          GitHub App integration (auth, webhooks, PRs)
+├── tests/
+│   └── simulation/      End-to-end integration tests
+└── docs/                Documentation and assets
+```
 
 ## Common Commands
 
@@ -45,8 +51,24 @@ bun run dev          # Watch mode for all packages
 bun run build        # Build all packages
 bun run test         # Run all tests
 bun run lint         # Lint all packages
+bun run lint:fix     # Auto-fix lint issues
 bun run format       # Format with Prettier
 bun run typecheck    # Type check all packages
+```
+
+### Running a single package
+
+```bash
+bun run --filter=@doqtor/parser test
+bun run --filter=@doqtor/cli build
+```
+
+### Running simulations
+
+```bash
+bun run simulate              # Default simulation
+bun run simulate:validatorjs  # ValidatorJS scenario
+bun run simulate:statestream  # StateStream scenario
 ```
 
 ## Development Workflow
@@ -78,7 +100,7 @@ bun run typecheck    # Type check all packages
 bun run test
 
 # Run tests for a specific package
-cd packages/parser && bun run test
+bun run --filter=@doqtor/parser test
 
 # Watch mode
 bun run test:watch
@@ -88,18 +110,21 @@ Tests live next to the source files or in a `__tests__` directory within each pa
 
 ## Commit Messages
 
-- `feat: add parameter diffing to parser`
-- `fix: handle empty diff input in core-engine`
-- `docs: update CLI usage examples`
-- `test: add matcher edge case tests`
-- `chore: update dependencies`
+Follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+- `feat:` new feature
+- `fix:` bug fix
+- `docs:` documentation changes
+- `test:` adding or updating tests
+- `refactor:` code changes that neither fix a bug nor add a feature
+- `chore:` maintenance tasks
 
 ## Pull Requests
 
 - One feature or fix per PR
 - Include a description of what changed and why
 - Link related issues if applicable
-- Make sure CI passes before requesting review
+- Make sure all checks pass before requesting review
 
 ## Questions?
 
