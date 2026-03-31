@@ -16,7 +16,7 @@
 
 import { analyzeDiff, detectDrift } from "@doqtor/core-engine";
 import type { DriftReport, DocPatch } from "@doqtor/core-engine";
-import { parseSourceFile } from "@doqtor/parser";
+import { parseSource } from "@doqtor/parser";
 import { matchDocs } from "@doqtor/matcher";
 import { generateFixes } from "@doqtor/fixer";
 
@@ -85,7 +85,7 @@ async function main() {
   const changeSets = await analyzeDiff({
     diff: STATESTREAM_DIFF,
     getFileContent: async (path, ref) => files[ref]?.[path] ?? null,
-    parseFn: parseSourceFile,
+    parseFn: parseSource,
   });
 
   console.log(`Files changed: ${changeSets.length}`);

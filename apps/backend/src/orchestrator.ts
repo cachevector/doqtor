@@ -1,6 +1,6 @@
 import { analyzeDiff, detectDrift } from "@doqtor/core-engine";
 import type { DoqtorConfig, DocPatch } from "@doqtor/core-engine";
-import { parseSourceFile } from "@doqtor/parser";
+import { parseSource } from "@doqtor/parser";
 import { matchDocs } from "@doqtor/matcher";
 import type { DocFile } from "@doqtor/matcher";
 import { generateFixes } from "@doqtor/fixer";
@@ -51,7 +51,7 @@ export async function orchestrate(input: OrchestratorInput): Promise<void> {
       const gitRef = ref === "old" ? `${input.baseBranch}~1` : input.baseBranch;
       return github.getFileContent(input.owner, input.repo, path, gitRef);
     },
-    parseFn: parseSourceFile,
+    parseFn: parseSource,
   });
 
   if (changeSets.length === 0) {
