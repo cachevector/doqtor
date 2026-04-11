@@ -86,19 +86,29 @@ Install the [Doqtor GitHub App](https://github.com/apps/doqtor-bot) on your repo
 
 To run your own instance of the backend:
 
-```bash
-git clone https://github.com/cachevector/doqtor.git
-cd doqtor
-bun install
-bun run build
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/cachevector/doqtor.git
+    cd doqtor
+    bun install
+    bun run build
+    ```
 
-# Copy and configure environment
-cp .env.example .env
-# Edit .env with your GitHub App credentials
+2.  **Start the server in setup mode:**
+    ```bash
+    bun run --cwd apps/backend dev
+    ```
 
-# Start the webhook server
-bun run --cwd apps/backend dev
-```
+3.  **Create your GitHub App:**
+    Visit `https://github.com/settings/apps/new?manifest=` followed by the content of `github-app-manifest.json` (URL-encoded).
+    
+    *Alternatively, once the server is running, the [one-click setup](http://localhost:3000/setup-complete) link will be pre-configured if you use the manifest flow.*
+
+4.  **Configure environment:**
+    After creating the app, you'll be redirected back to the server. Copy the generated environment variables into a `.env` file in the root directory.
+
+5.  **Restart the server:**
+    Restart the backend to load the new credentials.
 
 ## Configuration
 

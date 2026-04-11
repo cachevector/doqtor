@@ -9,6 +9,7 @@ import {
   parsePullRequestEvent,
   verifyWebhookSignature,
   createInstallationOctokit,
+  convertManifestCode,
 } from "@doqtor/github";
 import type { GitHubAppConfig } from "@doqtor/github";
 
@@ -18,19 +19,50 @@ setLogLevel(env.LOG_LEVEL as LogLevel);
 const log = createLogger({ module: "server" });
 const app = new Hono();
 
-const appConfig: GitHubAppConfig = {
-  appId: env.GITHUB_APP_ID,
-  privateKey: env.GITHUB_PRIVATE_KEY,
-  webhookSecret: env.GITHUB_WEBHOOK_SECRET,
-};
+const appConfig: GitHubAppConfig | null =
+  env.GITHUB_APP_ID && env.GITHUB_PRIVATE_KEY
+    ? {
+        appId: env.GITHUB_APP_ID,
+        privateKey: env.GITHUB_PRIVATE_KEY,
+        webhookSecret: env.GITHUB_WEBHOOK_SECRET || "",
+      }
+    : null;
 
-const webhooks = createWebhookHandler(env.GITHUB_WEBHOOK_SECRET);
+const webhooks = env.GITHUB_WEBHOOK_SECRET
+  ? createWebhookHandler(env.GITHUB_WEBHOOK_SECRET)
+  : null;
 
 app.get("/health", (c) => {
-  return c.json({ status: "ok", timestamp: new Date().toISOString() });
+  return c.json({ status: "ok", timestamp: new Date().toISOString(), configured: !!appConfig });
+});
+
+app.get("/setup-complete", async (c) => {
+  const code = c.req.query("code");
+  if (!code) return c.text("Missing setup code", 400);
+
+  try {
+    const manifest = await convertManifestCode(code);
+    return c.html(`
+      <h1>Setup Complete!</h1>
+      <p>Add these variables to your <code>.env</code> file and restart the server:</p>
+      <pre style="background: #f4f4f4; padding: 20px;">
+GITHUB_APP_ID=${manifest.id}
+GITHUB_PRIVATE_KEY="${manifest.pem.replace(/\n/g, "\\n")}"
+GITHUB_WEBHOOK_SECRET=${manifest.webhook_secret}
+      </pre>
+      <p>After restarting, you can install the app on your repositories.</p>
+    `);
+  } catch (error) {
+    return c.text("Failed to complete setup: " + (error instanceof Error ? error.message : "Unknown error"), 500);
+  }
 });
 
 app.post("/webhook", async (c) => {
+  if (!appConfig || !webhooks) {
+    log.warn("Webhook received but app not configured");
+    return c.json({ error: "App not configured" }, 503);
+  }
+
   const signature = c.req.header("x-hub-signature-256") ?? "";
   const body = await c.req.text();
 
@@ -88,6 +120,8 @@ app.post("/webhook", async (c) => {
 });
 
 log.info("Server starting", { port: env.PORT });
+
+export { app };
 
 export default {
   port: env.PORT,

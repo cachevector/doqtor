@@ -126,18 +126,23 @@
 - [x] CONTRIBUTING.md
 - [x] Example `doqtor.config.json` in repo
 - [x] `.env.example` for backend
-- [ ] GitHub App manifest for easy installation
+- [x] GitHub App Manifest: Create a manifest file to allow for easy one-click installation of the GitHub App.
 - [x] npm publish CLI package (`@doqtor/cli` on npm)
 - [x] Deploy backend, verify on a real repo
 
 ---
 
-## Deferred / Future
+## Phase 11: Early Enhancements
 
 - [ ] PR batching (aggregate multiple webhook events)
 - [ ] Python support via tree-sitter
 - [ ] Executable docs validation (run code blocks)
 - [ ] Drift analytics dashboard
+
+---
+
+## Phase 12: Advanced Features
+
 - [ ] PostgreSQL for history / Redis for queue
 - [ ] Multi-repo org dashboard
 - [ ] VSCode extension

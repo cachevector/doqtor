@@ -33,3 +33,26 @@ export async function createInstallationOctokit(
 
   return new Octokit({ auth: token });
 }
+
+export async function convertManifestCode(code: string): Promise<{
+  id: number;
+  slug: string;
+  node_id: string;
+  client_id: string;
+  client_secret: string;
+  webhook_secret: string;
+  pem: string;
+}> {
+  const response = await fetch(`https://api.github.com/app-manifests/${code}/conversions`, {
+    method: "POST",
+    headers: {
+      Accept: "application/vnd.github.v3+json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to convert manifest code: ${response.statusText}`);
+  }
+
+  return response.json() as any;
+}

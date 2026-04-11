@@ -1,0 +1,19 @@
+{
+  "name": "Doqtor (Self-Hosted)",
+  "url": "https://github.com/cachevector/doqtor",
+  "public": false,
+  "redirect_url": "http://localhost:3000/setup-complete",
+  "hook_attributes": {
+    "url": "http://localhost:3000/webhook",
+    "active": true
+  },
+  "default_permissions": {
+    "contents": "write",
+    "pull_requests": "write",
+    "metadata": "read"
+  },
+  "default_events": [
+    "pull_request"
+  ],
+  "description": "Ensures documentation is always aligned with code by automatically detecting changes and generating updates after PR merges."
+}
