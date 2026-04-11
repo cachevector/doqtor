@@ -52,11 +52,12 @@ export class GitHubService {
     owner: string,
     repo: string,
     baseBranch: string,
-    prNumber: number,
+    prNumbers: number[],
     patches: DocPatch[],
     summary: string,
   ): Promise<PrCreationResult> {
-    const branchName = `doqtor/docs-update-pr-${prNumber}`;
+    const mainPrNumber = prNumbers[0];
+    const branchName = `doqtor/docs-update-batch-${mainPrNumber}`;
 
     const baseRef = await this.withRetry(() =>
       this.octokit.git.getRef({
@@ -88,14 +89,18 @@ export class GitHubService {
       await this.commitFilePatches(owner, repo, branchName, filePath, filePatches);
     }
 
+    const title = prNumbers.length > 1 
+      ? `docs: update after batch of PRs (${prNumbers.length})`
+      : `docs: update after #${mainPrNumber}`;
+
     const { data: pr } = await this.withRetry(() =>
       this.octokit.pulls.create({
         owner,
         repo,
-        title: `docs: update after #${prNumber}`,
+        title,
         head: branchName,
         base: baseBranch,
-        body: formatPrBody(prNumber, patches, summary),
+        body: formatPrBody(prNumbers, patches, summary),
       }),
     );
 
@@ -176,14 +181,15 @@ export class GitHubService {
   }
 }
 
-function formatPrBody(prNumber: number, patches: DocPatch[], summary: string): string {
+function formatPrBody(prNumbers: number[], patches: DocPatch[], summary: string): string {
+  const prLinks = prNumbers.map(n => `#${n}`).join(", ");
   const changes = patches
     .map((p) => `- Updated \`${p.filePath}\` (${p.driftItem.type}: ${p.driftItem.symbolName})`)
     .join("\n");
 
   return `## Documentation Update
 
-This PR updates documentation to reflect code changes from #${prNumber}.
+This PR updates documentation to reflect code changes from ${prLinks}.
 
 ### Changes
 

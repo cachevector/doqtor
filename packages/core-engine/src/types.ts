@@ -69,4 +69,5 @@ export interface DoqtorConfig {
     provider?: "openai" | "anthropic";
   };
   autoPR: boolean;
+  batchWindow?: number; // Minutes to wait before processing a batch
 }

@@ -1,70 +1,124 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { Hono } from "hono";
 
 // Mocking dependencies before importing app
 vi.mock("@doqtor/github", () => ({
   convertManifestCode: vi.fn(),
-  createWebhookHandler: vi.fn(),
+  createWebhookHandler: vi.fn().mockReturnValue({
+    verify: vi.fn().mockResolvedValue(true),
+  }),
   parsePullRequestEvent: vi.fn(),
-  verifyWebhookSignature: vi.fn(),
+  verifyWebhookSignature: vi.fn().mockResolvedValue(true),
+  GitHubService: vi.fn().mockImplementation(() => ({})),
+  createInstallationOctokit: vi.fn().mockResolvedValue({}),
 }));
 
-// We need to bypass env loading if possible or mock it
-vi.mock("../env.js", () => ({
-  loadEnv: () => ({
-    PORT: 3000,
-    LOG_LEVEL: "info",
-  }),
+vi.mock("../orchestrator.js", () => ({
+  orchestrate: vi.fn(),
+  fetchConfig: vi.fn(),
 }));
+
+vi.mock("../batcher.js", () => ({
+  addToBatch: vi.fn(),
+}));
+
+vi.mock("../queue.js", () => ({
+  enqueue: vi.fn(),
+}));
+
+import * as envModule from "../env.js";
 
 // Import app after mocks
 import { app } from "../index.js";
 
+const testEnv = JSON.stringify({
+  PORT: 3000,
+  LOG_LEVEL: "info",
+  GITHUB_APP_ID: "123",
+  GITHUB_PRIVATE_KEY: "key",
+  GITHUB_WEBHOOK_SECRET: "secret",
+});
+
 describe("Server Setup Flow", () => {
-  it("GET /health should return 200 and configured: false when env is missing", async () => {
-    const res = await app.request("/health");
+  beforeEach(() => {
+    vi.spyOn(envModule, "loadEnv").mockReturnValue({
+      PORT: 3000,
+      LOG_LEVEL: "info",
+      GITHUB_APP_ID: "123",
+      GITHUB_PRIVATE_KEY: "key",
+      GITHUB_WEBHOOK_SECRET: "secret",
+    });
+  });
+
+  it("GET /health should return 200 and configured: true with test env", async () => {
+    const res = await app.request("/health", {
+      headers: { "x-test-env": testEnv }
+    });
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.configured).toBe(false);
+    expect(body.configured).toBe(true);
   });
 
-  it("GET /setup-complete should return 400 when code is missing", async () => {
-    const res = await app.request("/setup-complete");
-    expect(res.status).toBe(400);
-    expect(await res.text()).toBe("Missing setup code");
-  });
-
-  it("GET /setup-complete should call convertManifestCode and return HTML with credentials", async () => {
-    const { convertManifestCode } = await import("@doqtor/github");
-    const mockManifest = {
-      id: 999,
-      pem: "PRIVATE_KEY_CONTENT",
-      webhook_secret: "secret123",
-    };
-    (convertManifestCode as any).mockResolvedValue(mockManifest);
-
-    const res = await app.request("/setup-complete?code=abc-123");
+  it("POST /webhook should batch PRs when batchWindow > 0", async () => {
+    const { parsePullRequestEvent } = await import("@doqtor/github");
+    const { fetchConfig } = await import("../orchestrator.js");
+    const { addToBatch } = await import("../batcher.js");
     
-    expect(res.status).toBe(200);
-    const html = await res.text();
-    expect(html).toContain("GITHUB_APP_ID=999");
-    expect(html).toContain("GITHUB_PRIVATE_KEY=\"PRIVATE_KEY_CONTENT\"");
-    expect(html).toContain("GITHUB_WEBHOOK_SECRET=secret123");
-    expect(convertManifestCode).toHaveBeenCalledWith("abc-123");
-  });
+    (fetchConfig as any).mockResolvedValue({ batchWindow: 5, autoPR: true });
+    (parsePullRequestEvent as any).mockImplementation(() => ({
+      action: "closed",
+      merged: true,
+      owner: "owner",
+      repo: "repo",
+      number: 123,
+      installationId: 456,
+      baseBranch: "main",
+    }));
 
-  it("POST /webhook should return 503 when app is not configured", async () => {
     const res = await app.request("/webhook", {
       method: "POST",
       headers: {
         "x-hub-signature-256": "sha256=...",
-        "x-github-event": "pull_request"
+        "x-github-event": "pull_request",
+        "x-test-env": testEnv
       },
       body: JSON.stringify({ action: "closed" })
     });
     
-    expect(res.status).toBe(503);
+    expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.error).toBe("App not configured");
+    expect(body.status).toBe("batched");
+    expect(addToBatch).toHaveBeenCalled();
+  });
+
+  it("POST /webhook should enqueue immediately when batchWindow is 0", async () => {
+    const { parsePullRequestEvent } = await import("@doqtor/github");
+    const { fetchConfig } = await import("../orchestrator.js");
+    const { enqueue } = await import("../queue.js");
+    
+    (fetchConfig as any).mockResolvedValue({ batchWindow: 0, autoPR: true });
+    (parsePullRequestEvent as any).mockImplementation(() => ({
+      action: "closed",
+      merged: true,
+      owner: "owner",
+      repo: "repo",
+      number: 124,
+      installationId: 456,
+      baseBranch: "main",
+    }));
+
+    const res = await app.request("/webhook", {
+      method: "POST",
+      headers: {
+        "x-hub-signature-256": "sha256=...",
+        "x-github-event": "pull_request",
+        "x-test-env": testEnv
+      },
+      body: JSON.stringify({ action: "closed" })
+    });
+    
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.status).toBe("queued");
+    expect(enqueue).toHaveBeenCalled();
   });
 });

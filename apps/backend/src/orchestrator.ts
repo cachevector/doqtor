@@ -8,7 +8,7 @@ import { GitHubService } from "@doqtor/github";
 import type { Octokit } from "@octokit/rest";
 import { createLogger } from "./logger.js";
 
-const DEFAULT_CONFIG: DoqtorConfig = {
+export const DEFAULT_CONFIG: DoqtorConfig = {
   docsPaths: ["README.md", "docs/"],
   ignore: ["node_modules/", "dist/", ".git/"],
   ai: { enabled: false },
@@ -18,15 +18,18 @@ const DEFAULT_CONFIG: DoqtorConfig = {
 export interface OrchestratorInput {
   owner: string;
   repo: string;
-  prNumber: number;
+  prNumbers: number[];
   baseBranch: string;
   octokit: Octokit;
 }
 
 export async function orchestrate(input: OrchestratorInput): Promise<void> {
-  const log = createLogger({ repo: `${input.owner}/${input.repo}`, pr: input.prNumber });
+  const log = createLogger({ 
+    repo: `${input.owner}/${input.repo}`, 
+    prs: input.prNumbers.join(",") 
+  });
 
-  log.info("Starting pipeline");
+  log.info("Starting pipeline", { batchSize: input.prNumbers.length });
 
   const github = new GitHubService(input.octokit);
 
@@ -34,19 +37,22 @@ export async function orchestrate(input: OrchestratorInput): Promise<void> {
   const config = await fetchConfig(github, input);
   log.info("Config loaded", { docsPaths: config.docsPaths });
 
-  // Step 2: Get PR diff
-  log.info("Fetching PR diff");
-  const diff = await github.getPrDiff(input.owner, input.repo, input.prNumber);
+  // Step 2: Get PR diffs
+  log.info("Fetching PR diffs");
+  const diffs = await Promise.all(
+    input.prNumbers.map(n => github.getPrDiff(input.owner, input.repo, n))
+  );
+  const combinedDiff = diffs.join("\n");
 
-  if (!diff.trim()) {
-    log.info("Empty diff, skipping");
+  if (!combinedDiff.trim()) {
+    log.info("Empty combined diff, skipping");
     return;
   }
 
   // Step 3: Analyze diff
-  log.info("Analyzing diff");
+  log.info("Analyzing combined diff");
   const changeSets = await analyzeDiff({
-    diff,
+    diff: combinedDiff,
     getFileContent: async (path, ref) => {
       const gitRef = ref === "old" ? `${input.baseBranch}~1` : input.baseBranch;
       return github.getFileContent(input.owner, input.repo, path, gitRef);
@@ -114,7 +120,7 @@ export async function orchestrate(input: OrchestratorInput): Promise<void> {
     input.owner,
     input.repo,
     input.baseBranch,
-    input.prNumber,
+    input.prNumbers,
     patches,
     summary,
   );
@@ -122,9 +128,9 @@ export async function orchestrate(input: OrchestratorInput): Promise<void> {
   log.info("Docs PR created", { prUrl: result.prUrl, prNumber: result.prNumber });
 }
 
-async function fetchConfig(
+export async function fetchConfig(
   github: GitHubService,
-  input: OrchestratorInput,
+  input: { owner: string; repo: string; baseBranch: string },
 ): Promise<DoqtorConfig> {
   const configContent = await github.getFileContent(
     input.owner,
