@@ -3,11 +3,11 @@ import { parseSource } from "../parser.js";
 
 describe("parseSource", () => {
   describe("functions", () => {
-    it("extracts a simple function", () => {
+    it("extracts a simple function", async () => {
       const code = `export function greet(name: string): string {
         return "hello " + name;
       }`;
-      const symbols = parseSource("test.ts", code);
+      const symbols = await parseSource("test.ts", code);
 
       expect(symbols).toHaveLength(1);
       expect(symbols[0]).toMatchObject({
@@ -25,9 +25,9 @@ describe("parseSource", () => {
       expect(symbols[0]!.returnType).toBe("string");
     });
 
-    it("extracts functions with optional and default parameters", () => {
+    it("extracts functions with optional and default parameters", async () => {
       const code = `export function create(name: string, age?: number, active = true) {}`;
-      const symbols = parseSource("test.ts", code);
+      const symbols = await parseSource("test.ts", code);
 
       expect(symbols[0]!.parameters).toHaveLength(3);
       expect(symbols[0]!.parameters![0]).toMatchObject({ name: "name", optional: false });
@@ -39,9 +39,9 @@ describe("parseSource", () => {
       });
     });
 
-    it("extracts non-exported functions with includePrivate", () => {
+    it("extracts non-exported functions with includePrivate", async () => {
       const code = `function internal() {}`;
-      const symbols = parseSource("test.ts", code, true);
+      const symbols = await parseSource("test.ts", code, true);
 
       expect(symbols[0]).toMatchObject({
         name: "internal",
@@ -49,21 +49,21 @@ describe("parseSource", () => {
       });
     });
 
-    it("excludes non-exported functions by default", () => {
+    it("excludes non-exported functions by default", async () => {
       const code = `function internal() {}`;
-      const symbols = parseSource("test.ts", code);
+      const symbols = await parseSource("test.ts", code);
 
       expect(symbols).toHaveLength(0);
     });
   });
 
   describe("classes", () => {
-    it("extracts class and its methods", () => {
+    it("extracts class and its methods", async () => {
       const code = `export class UserService {
         create(email: string): void {}
         delete(id: number): boolean { return true; }
       }`;
-      const symbols = parseSource("test.ts", code);
+      const symbols = await parseSource("test.ts", code);
 
       expect(symbols).toHaveLength(3);
       expect(symbols[0]).toMatchObject({ name: "UserService", kind: "class", exported: true });
@@ -78,12 +78,12 @@ describe("parseSource", () => {
   });
 
   describe("interfaces", () => {
-    it("extracts exported interfaces", () => {
+    it("extracts exported interfaces", async () => {
       const code = `export interface User {
         id: number;
         name: string;
       }`;
-      const symbols = parseSource("test.ts", code);
+      const symbols = await parseSource("test.ts", code);
 
       expect(symbols).toHaveLength(1);
       expect(symbols[0]).toMatchObject({
@@ -95,9 +95,9 @@ describe("parseSource", () => {
   });
 
   describe("type aliases", () => {
-    it("extracts type aliases", () => {
+    it("extracts type aliases", async () => {
       const code = `export type Status = "active" | "inactive";`;
-      const symbols = parseSource("test.ts", code);
+      const symbols = await parseSource("test.ts", code);
 
       expect(symbols).toHaveLength(1);
       expect(symbols[0]).toMatchObject({
@@ -109,9 +109,9 @@ describe("parseSource", () => {
   });
 
   describe("constants", () => {
-    it("extracts exported constants", () => {
+    it("extracts exported constants", async () => {
       const code = `export const MAX_RETRIES = 3;`;
-      const symbols = parseSource("test.ts", code);
+      const symbols = await parseSource("test.ts", code);
 
       expect(symbols).toHaveLength(1);
       expect(symbols[0]).toMatchObject({
@@ -121,9 +121,9 @@ describe("parseSource", () => {
       });
     });
 
-    it("extracts multiple declarations in one statement", () => {
+    it("extracts multiple declarations in one statement", async () => {
       const code = `export const A = 1, B = 2;`;
-      const symbols = parseSource("test.ts", code);
+      const symbols = await parseSource("test.ts", code);
 
       expect(symbols).toHaveLength(2);
       expect(symbols[0]).toMatchObject({ name: "A", kind: "constant" });
@@ -132,7 +132,7 @@ describe("parseSource", () => {
   });
 
   describe("JSDoc", () => {
-    it("extracts JSDoc comments from functions", () => {
+    it("extracts JSDoc comments from functions", async () => {
       const code = `/**
  * Creates a new user in the system.
  * @param name - The user's display name
@@ -141,22 +141,22 @@ describe("parseSource", () => {
 export function createUser(name: string) {
   return { name };
 }`;
-      const symbols = parseSource("test.ts", code);
+      const symbols = await parseSource("test.ts", code);
 
       expect(symbols[0]!.jsDoc).toContain("Creates a new user");
       expect(symbols[0]!.jsDoc).toContain("@param name");
     });
 
-    it("returns undefined when no JSDoc present", () => {
+    it("returns undefined when no JSDoc present", async () => {
       const code = `export function noDoc() {}`;
-      const symbols = parseSource("test.ts", code);
+      const symbols = await parseSource("test.ts", code);
 
       expect(symbols[0]!.jsDoc).toBeUndefined();
     });
   });
 
   describe("mixed file", () => {
-    it("extracts all symbol types from a realistic file", () => {
+    it("extracts all symbol types from a realistic file", async () => {
       const code = `
 /** Configuration options */
 export interface Config {
@@ -175,7 +175,7 @@ export class ApiClient {
 
 function internalHelper() {}
 `;
-      const symbols = parseSource("api.ts", code);
+      const symbols = await parseSource("api.ts", code);
 
       const names = symbols.map((s) => s.name);
       expect(names).toContain("Config");

@@ -7,7 +7,7 @@ import type { ParsedSymbol } from "../types.js";
  * Minimal inline parser for integration tests — avoids depending on @doqtor/parser
  * to keep core-engine tests self-contained.
  */
-function simpleParse(_path: string, content: string): ParsedSymbol[] {
+async function simpleParse(_path: string, content: string): Promise<ParsedSymbol[]> {
   const symbols: ParsedSymbol[] = [];
   const fnRegex = /(?:export\s+)?function\s+(\w+)\s*\(([^)]*)\)(?:\s*:\s*(\w+))?/g;
   let match;

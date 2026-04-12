@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { analyzeDiff } from "../diff-analyzer.js";
 import type { ParsedSymbol } from "../types.js";
 
-function mockParseFn(_filePath: string, content: string): ParsedSymbol[] {
+async function mockParseFn(_filePath: string, content: string): Promise<ParsedSymbol[]> {
   const symbols: ParsedSymbol[] = [];
   const fnRegex = /(?:export )?function (\w+)\(([^)]*)\)/g;
   let match;

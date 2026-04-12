@@ -1,7 +1,7 @@
 import type { ParsedSymbol, ChangeSet, ModifiedSymbol } from "./types.js";
 import { parseDiff, type DiffFile } from "./diff-parser.js";
 
-export type ParseFn = (filePath: string, content: string) => ParsedSymbol[];
+export type ParseFn = (filePath: string, content: string) => Promise<ParsedSymbol[]>;
 
 export interface AnalyzerInput {
   diff: string;
@@ -11,11 +11,11 @@ export interface AnalyzerInput {
 
 export async function analyzeDiff(input: AnalyzerInput): Promise<ChangeSet[]> {
   const diffFiles = parseDiff(input.diff);
-  const tsFiles = diffFiles.filter((f) => isTypeScriptFile(f.newPath) || isTypeScriptFile(f.oldPath));
+  const supportedFiles = diffFiles.filter((f) => isSupportedFile(f.newPath) || isSupportedFile(f.oldPath));
 
   const changeSets: ChangeSet[] = [];
 
-  for (const file of tsFiles) {
+  for (const file of supportedFiles) {
     const changeSet = await analyzeFile(file, input);
     if (changeSet) {
       changeSets.push(changeSet);
@@ -32,7 +32,7 @@ async function analyzeFile(file: DiffFile, input: AnalyzerInput): Promise<Change
     const newContent = await input.getFileContent(file.newPath, "new");
     if (!newContent) return null;
 
-    const newSymbols = input.parseFn(file.newPath, newContent);
+    const newSymbols = await input.parseFn(file.newPath, newContent);
     return {
       filePath: file.newPath,
       added: newSymbols,
@@ -45,7 +45,7 @@ async function analyzeFile(file: DiffFile, input: AnalyzerInput): Promise<Change
     const oldContent = await input.getFileContent(file.oldPath, "old");
     if (!oldContent) return null;
 
-    const oldSymbols = input.parseFn(file.oldPath, oldContent);
+    const oldSymbols = await input.parseFn(file.oldPath, oldContent);
     return {
       filePath: file.oldPath,
       added: [],
@@ -61,8 +61,8 @@ async function analyzeFile(file: DiffFile, input: AnalyzerInput): Promise<Change
 
   if (!oldContent || !newContent) return null;
 
-  const oldSymbols = input.parseFn(file.oldPath, oldContent);
-  const newSymbols = input.parseFn(file.newPath, newContent);
+  const oldSymbols = await input.parseFn(file.oldPath, oldContent);
+  const newSymbols = await input.parseFn(file.newPath, newContent);
 
   return diffSymbols(filePath, oldSymbols, newSymbols);
 }
@@ -121,6 +121,7 @@ function hasSymbolChanged(a: ParsedSymbol, b: ParsedSymbol): boolean {
   return false;
 }
 
-function isTypeScriptFile(path: string): boolean {
-  return /\.tsx?$/.test(path) && !path.endsWith(".d.ts");
+function isSupportedFile(path: string): boolean {
+  if (path.endsWith(".d.ts")) return false;
+  return /\.tsx?$/.test(path) || path.endsWith(".py");
 }
