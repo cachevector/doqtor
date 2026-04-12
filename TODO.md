@@ -134,8 +134,8 @@
 
 ## Phase 11: Early Enhancements
 
-- [ ] PR batching (aggregate multiple webhook events)
-- [ ] Python support via tree-sitter
+- [x] PR batching (aggregate multiple webhook events)
+- [x] Python support via filbert parser
 - [ ] Executable docs validation (run code blocks)
 - [ ] Drift analytics dashboard
 

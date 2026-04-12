@@ -23,6 +23,7 @@
         "@doqtor/github": "workspace:*",
         "@doqtor/matcher": "workspace:*",
         "@doqtor/parser": "workspace:*",
+        "@doqtor/validator": "workspace:*",
         "@octokit/rest": "^21.0.0",
         "hono": "^4.0.0",
       },
@@ -37,6 +38,7 @@
         "doqtor": "dist/index.js",
       },
       "dependencies": {
+        "@doqtor/validator": "workspace:*",
         "commander": "^12.0.0",
         "ts-morph": "^24.0.0",
       },
@@ -101,6 +103,16 @@
         "tsup": "^8.0.0",
       },
     },
+    "packages/validator": {
+      "name": "@doqtor/validator",
+      "version": "0.0.1",
+      "dependencies": {
+        "@doqtor/core-engine": "workspace:*",
+      },
+      "devDependencies": {
+        "tsup": "^8.0.0",
+      },
+    },
     "tests/simulation": {
       "name": "@doqtor/simulation",
       "version": "0.0.1",
@@ -128,6 +140,8 @@
     "@doqtor/parser": ["@doqtor/parser@workspace:packages/parser"],
 
     "@doqtor/simulation": ["@doqtor/simulation@workspace:tests/simulation"],
+
+    "@doqtor/validator": ["@doqtor/validator@workspace:packages/validator"],
 
     "@esbuild/aix-ppc64": ["@esbuild/aix-ppc64@0.27.4", "", { "os": "aix", "cpu": "ppc64" }, "sha512-cQPwL2mp2nSmHHJlCyoXgHGhbEPMrEEU5xhkcy3Hs/O7nGZqEpZ2sUtLaL9MORLtDfRvVl2/3PAuEkYZH0Ty8Q=="],
 

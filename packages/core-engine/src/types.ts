@@ -70,4 +70,5 @@ export interface DoqtorConfig {
   };
   autoPR: boolean;
   batchWindow?: number; // Minutes to wait before processing a batch
+  executableDocs?: boolean; // Enable execution of code blocks in docs
 }

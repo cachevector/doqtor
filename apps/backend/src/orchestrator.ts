@@ -2,8 +2,8 @@ import { analyzeDiff, detectDrift } from "@doqtor/core-engine";
 import type { DoqtorConfig, DocPatch } from "@doqtor/core-engine";
 import { parseSource } from "@doqtor/parser";
 import { matchDocs } from "@doqtor/matcher";
-import type { DocFile } from "@doqtor/matcher";
 import { generateFixes } from "@doqtor/fixer";
+import { validateExecutableDocs } from "@doqtor/validator";
 import { GitHubService } from "@doqtor/github";
 import type { Octokit } from "@octokit/rest";
 import { createLogger } from "./logger.js";
@@ -92,6 +92,25 @@ export async function orchestrate(input: OrchestratorInput): Promise<void> {
   log.info("Detecting drift");
   const report = detectDrift({ changeSets, docReferences });
 
+  // Step 7: Executable Docs Validation
+  if (config.executableDocs) {
+    log.info("Validating executable code blocks in docs");
+    const validationReport = await validateExecutableDocs(docFiles, "."); 
+    for (const result of validationReport.results) {
+      if (!result.success) {
+        report.items.push({
+          type: "outdated-example",
+          symbolName: "executable-block",
+          filePath: result.codeBlock.filePath,
+          lineStart: result.codeBlock.lineStart,
+          lineEnd: result.codeBlock.lineStart,
+          message: `Executable code block failed: ${result.error}`,
+          confidence: 1,
+        });
+      }
+    }
+  }
+
   if (report.items.length === 0) {
     log.info("No documentation drift detected");
     return;
@@ -99,21 +118,16 @@ export async function orchestrate(input: OrchestratorInput): Promise<void> {
 
   log.info("Drift detected", { items: report.items.length });
 
-  // Step 7: Generate fixes
+  // Step 8: Generate fixes
   log.info("Generating fixes");
   const patches = await generateFixes(report);
 
   if (patches.length === 0) {
-    log.info("No patches generated");
+    log.info("No deterministic fixes could be generated");
     return;
   }
 
-  // Step 8: Create PR
-  if (!config.autoPR) {
-    log.info("Auto PR disabled, skipping PR creation", { patches: patches.length });
-    return;
-  }
-
+  // Step 9: Create PR
   log.info("Creating docs PR");
   const summary = buildSummary(patches);
   const result = await github.createDocsPr(
@@ -139,49 +153,32 @@ export async function fetchConfig(
     input.baseBranch,
   );
 
-  if (configContent) {
-    try {
-      const parsed = JSON.parse(configContent) as Partial<DoqtorConfig>;
-      return { ...DEFAULT_CONFIG, ...parsed };
-    } catch {
-      // Invalid config, use defaults
-    }
+  if (!configContent) {
+    return DEFAULT_CONFIG;
   }
 
-  return DEFAULT_CONFIG;
+  try {
+    return JSON.parse(configContent);
+  } catch {
+    return DEFAULT_CONFIG;
+  }
 }
 
 async function fetchDocFiles(
   github: GitHubService,
   input: OrchestratorInput,
   config: DoqtorConfig,
-): Promise<DocFile[]> {
-  const files: DocFile[] = [];
+): Promise<{ path: string; content: string }[]> {
+  // Simplification: only fetch files from config.docsPaths
+  // For each path, if it's a file, fetch it. If it's a directory, we'd need to list it.
+  // GitHub API list files in directory: getContents
+  
+  const files: { path: string; content: string }[] = [];
 
   for (const docPath of config.docsPaths) {
-    if (docPath.endsWith("/")) {
-      // Directory — we'd need to list tree; for MVP, try common files
-      for (const name of ["README.md", "guide.md", "api.md", "getting-started.md"]) {
-        const content = await github.getFileContent(
-          input.owner,
-          input.repo,
-          `${docPath}${name}`,
-          input.baseBranch,
-        );
-        if (content) {
-          files.push({ path: `${docPath}${name}`, content });
-        }
-      }
-    } else {
-      const content = await github.getFileContent(
-        input.owner,
-        input.repo,
-        docPath,
-        input.baseBranch,
-      );
-      if (content) {
-        files.push({ path: docPath, content });
-      }
+    const content = await github.getFileContent(input.owner, input.repo, docPath, input.baseBranch);
+    if (content) {
+      files.push({ path: docPath, content });
     }
   }
 
@@ -193,9 +190,9 @@ function buildSummary(patches: DocPatch[]): string {
     .map((p) => {
       switch (p.driftItem.type) {
         case "signature-mismatch":
-          return `Updated ${p.driftItem.symbolName} signature in ${p.filePath}`;
+          return `Updated signature for ${p.driftItem.symbolName} in ${p.filePath}`;
         case "removed-symbol":
-          return `Removed references to ${p.driftItem.symbolName} in ${p.filePath}`;
+          return `Removed references to deleted symbol ${p.driftItem.symbolName} in ${p.filePath}`;
         case "renamed-symbol":
           return `Renamed ${p.driftItem.oldValue} → ${p.driftItem.newValue} in ${p.filePath}`;
         case "outdated-example":
