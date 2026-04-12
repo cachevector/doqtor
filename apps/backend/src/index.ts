@@ -5,6 +5,7 @@ import type { LogLevel } from "./logger.js";
 import { enqueue } from "./queue.js";
 import { orchestrate, fetchConfig } from "./orchestrator.js";
 import { addToBatch } from "./batcher.js";
+import { getStats } from "./stats.js";
 import {
   createWebhookHandler,
   parsePullRequestEvent,
@@ -36,10 +37,6 @@ function getContext(overrideEnv?: any) {
     ? createWebhookHandler(env.GITHUB_WEBHOOK_SECRET)
     : null;
 
-  if (!webhooks) {
-    contextLog.warn("Webhooks not initialized", { hasSecret: !!env.GITHUB_WEBHOOK_SECRET });
-  }
-
   return { env, log: contextLog, appConfig, webhooks };
 }
 
@@ -59,6 +56,52 @@ app.use("*", async (c, next) => {
 app.get("/health", (c) => {
   const { appConfig } = getContext(c.get("env"));
   return c.json({ status: "ok", timestamp: new Date().toISOString(), configured: !!appConfig });
+});
+
+app.get("/api/stats", (c) => {
+  return c.json(getStats());
+});
+
+app.get("/dashboard", (c) => {
+  const stats = getStats();
+  const driftByType = Object.entries(stats.driftByType).map(([type, count]) => `<li>${type}: ${count}</li>`).join("");
+  const driftByFile = Object.entries(stats.driftByFile).map(([file, count]) => `<li>${file}: ${count}</li>`).join("");
+
+  return c.html(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Doqtor Dashboard</title>
+        <style>
+          body { font-family: sans-serif; padding: 40px; line-height: 1.6; max-width: 800px; margin: 0 auto; background: #f9f9f9; }
+          .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+          h1 { color: #333; }
+          .metric { font-size: 2em; font-weight: bold; color: #007bff; }
+          ul { padding-left: 20px; }
+        </style>
+      </head>
+      <body>
+        <h1>Doqtor Drift Analytics</h1>
+        <div class="card">
+          <p>Total PRs Processed</p>
+          <div class="metric">${stats.totalPrsProcessed}</div>
+        </div>
+        <div class="card">
+          <p>Total Drift Detected</p>
+          <div class="metric">${stats.totalDriftDetected}</div>
+        </div>
+        <div class="card">
+          <h3>Drift by Type</h3>
+          <ul>${driftByType || "<li>No drift detected yet</li>"}</ul>
+        </div>
+        <div class="card">
+          <h3>Top Drifting Files</h3>
+          <ul>${driftByFile || "<li>No drift detected yet</li>"}</ul>
+        </div>
+        <p><small>Last processed: ${stats.lastProcessed || "Never"}</small></p>
+      </body>
+    </html>
+  `);
 });
 
 app.get("/setup-complete", async (c) => {
@@ -86,10 +129,7 @@ app.post("/webhook", async (c) => {
   const { log: contextLog, appConfig, webhooks } = getContext(c.get("env"));
   
   if (!appConfig || !webhooks) {
-    contextLog.warn("Webhook received but app not configured", { 
-      hasAppConfig: !!appConfig, 
-      hasWebhooks: !!webhooks 
-    });
+    contextLog.warn("Webhook received but app not configured");
     return c.json({ error: "App not configured" }, 503);
   }
 

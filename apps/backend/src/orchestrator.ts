@@ -7,6 +7,7 @@ import { validateExecutableDocs } from "@doqtor/validator";
 import { GitHubService } from "@doqtor/github";
 import type { Octokit } from "@octokit/rest";
 import { createLogger } from "./logger.js";
+import { recordDrift } from "./stats.js";
 
 export const DEFAULT_CONFIG: DoqtorConfig = {
   docsPaths: ["README.md", "docs/"],
@@ -117,6 +118,7 @@ export async function orchestrate(input: OrchestratorInput): Promise<void> {
   }
 
   log.info("Drift detected", { items: report.items.length });
+  recordDrift(report);
 
   // Step 8: Generate fixes
   log.info("Generating fixes");
